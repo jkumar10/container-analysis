@@ -11,7 +11,7 @@ cmd="sudo docker pull"
 def pullimage():
     try:
         print "\n----------Analysis started--------------"
-        for i in tqdm(range(69,80)):
+        for i in tqdm(range(0,143)):
             imagename=content[i]
             if imagename is not "httpd" and imagename is not "postgres":
                 newcmd=cmd+" "+imagename
