@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Clair Control report : centos</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,600italic,400italic,300italic,300' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: ghostwhite;
+            padding-bottom: 2em;
+        }
+        /* Typography */
+        
+        .lead {
+            font-size: 1.4em;
+        }
+        /* global layout */
+        
+        .container {
+            padding: 0 0;
+        }
+        
+        .clearfix:after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+        
+        .row {
+            margin: 0 -20px;
+        }
+        
+        .row:after {
+            display: block;
+            clear: both;
+        }
+        
+        [class*="col-"] {
+            padding: 0 20px;
+            float: left;
+            box-sizing: border-box;
+        }
+        
+        .col-6 {
+            width: 50%;
+        }
+        
+        .panel {
+            /* padding: 1em; */
+            border-radius: 4px;
+            background: white;
+            box-shadow: 0px 1px 2px #e2e2e2;
+        }
+        
+        .panel h2 {
+            margin-top: 0;
+            padding-bottom: .2em;
+            border-bottom: solid 1px gainsboro;
+        }
+        
+        .panel:last-child {
+            margin-bottom: 0;
+        }
+        /* Header */
+        
+        .app-header {
+            background: #2196F3;
+            color: white;
+            margin: 0 0px 0px 0px;
+            padding: 16px 20px;
+            box-shadow: 0 -2px 16px #263238;
+            position: relative;
+        }
+        
+        .app-header h1 {
+            margin: 0;
+            font-weight: lighter;
+            text-transform: uppercase;
+        }
+        
+        .app-intro {
+            padding: 20px;
+            text-align: center;
+            color: #263238;
+            background: rgba(255, 255, 255, .8);
+            border-bottom: solid 1px #ECEFF1;
+        }
+        
+        .app-intro h2 {
+            font-size: 2em;
+            font-weight: lighter;
+        }
+        
+        .summary {
+            line-height: .6em;
+        }
+        /* report */
+        
+        .report {
+            margin-top: 20px;
+        }
+        
+        .graph {
+            margin: 0 auto;
+            max-width: 960px;
+            margin-top: 30px;
+        }
+        /* Style of the graph */
+        
+        .graph .node {
+            position: relative;
+            display: inline-block;
+            height: 24px;
+            width: 24px;
+            margin: 2px;
+        }
+        
+        .graph .node .dot {
+            position: relative;
+            height: 24px;
+            width: 24px;
+            border-radius: 24px;
+            float: left;
+            background: gray;
+            /* box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+        border: solid 1px rgba(255, 255, 255, .2); */
+        }
+        
+        .graph .node.Defcon1 .dot {
+            background: black;
+        }
+        
+        .graph .node.Critical .dot {
+            background: #e81e1e;
+        }
+        
+        .graph .node.High .dot {
+            background: #E91E63;
+        }
+        
+        .graph .node.Medium .dot {
+            background: #FFA726;
+        }
+        
+        .graph .node.Low .dot {
+            background: #8BC34A;
+        }
+        
+        .graph .node.Negligible .dot {
+            background: #37474F;
+        }
+        
+        .graph .node.Unknown .dot {
+            background: #37474F;
+        }
+        
+        .graph .node .popup {
+            display: none;
+            width: 300px;
+            position: absolute;
+            bottom: 100%;
+            margin-bottom: 20px;
+            margin-left: -150px;
+            left: 2px;
+            background: white;
+            box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
+            padding: 10px;
+            border-radius: 4px;
+            /* border: solid 1px #e2e2e2; */
+            text-shadow: 0 0 0 transparent;
+        }
+        
+        .graph .node .popup:after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -10px;
+            display: block;
+            width: 0;
+            height: 0;
+            border-width: 10px 10px 0 10px;
+            border-color: white transparent transparent transparent;
+            border-style: solid;
+        }
+        
+        .graph .node .popup:before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -10px;
+            display: block;
+            width: 0;
+            height: 0;
+            border-width: 11px 11px 0 10px;
+            border-color: rgba(0, 0, 0, .2) transparent transparent transparent;
+            border-style: solid;
+        }
+        
+        .graph .node .popup > div {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .graph .node:hover .dot {
+            opacity: .8;
+        }
+        
+        .graph .node:hover .popup {
+            display: block;
+            max-height: 180px;
+            color: dimgray;
+        }
+        /* bars */
+        
+        .bar-bg {
+            display: inline-block;
+            width: 240px;
+            height: 6px;
+            position: relative;
+        }
+        
+        .bar-bar {
+            display: block;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            background: #E91E63;
+            border-radius: 2px;
+        }
+        
+        .bar-bar.Defcon1 {
+            background: black;
+        }
+        
+        .bar-bar.Critical {
+            background: #e81e1e;
+        }
+        
+        .bar-bar.High {
+            background: #E91E63;
+        }
+        
+        .bar-bar.Medium {
+            background: #FFA726;
+        }
+        
+        .bar-bar.Low {
+            background: #8BC34A;
+        }
+        
+        .bar-bar.Negligible {
+            background: #37474F;
+        }
+        
+        .bar-bar.Unknown {
+            background: #37474F;
+        }
+        /* vulnerabilities */
+        
+        .report {
+            margin: 18px auto;
+            max-width: 960px;
+        }
+        
+        .report .vulnerabilities,
+        .report .features > ul {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .report .features > ul {
+            list-style: none;
+        }
+        
+        .feature {
+            border-bottom: solid 1px #ECEFF1;
+        }
+        
+        .feature:last-child {
+            border-color: #CFD8DC;
+        }
+        
+        .feature__title {
+            padding: 1em;
+        }
+        
+        .vulnerabilities {
+            padding-left: 2.6em !important;
+        }
+        
+        .vulnerability {
+            padding-bottom: .8em;
+            padding-right: 2.2em;
+        }
+        
+        .vulnerabilities .Defcon1 .name {
+            color: black;
+        }
+        
+        .vulnerabilities .Critical .name {
+            color: #e81e1e;
+        }
+        
+        .vulnerabilities .High .name {
+            color: #E91E63;
+        }
+        
+        .vulnerabilities .Medium .name {
+            color: #FFA726;
+        }
+        
+        .vulnerabilities .Low .name {
+            color: #8BC34A;
+        }
+        
+        .vulnerabilities .Negligible .name {
+            color: #37474F;
+        }
+        
+        .vulnerabilities .Unknown .name {
+            color: #37474F;
+        }
+        /* layers */
+        
+        .layer .layer__title {
+            cursor: pointer;
+            padding: 1em;
+            border-bottom: solid 1px #CFD8DC;
+            color: #37474F;
+            margin: 0;
+        }
+        
+        .layer .layer__title:hover {
+            background: #ECEFF1;
+        }
+        
+        .layer.closed .features {
+            display: none;
+        }
+        
+        .summary-text {
+            display: flex;
+            max-width: 940px;
+            margin: 0 auto;
+            margin-bottom: 1em;
+            margin-top: 3em;
+        }
+        
+        .summary-text .node {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .summary-text .node:before {
+            content: '';
+            display: inline-block;
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            background: #2196F3;
+            margin-right: 10px;
+        }
+        
+        .summary-text .node.Defcon1:before {
+            background: black;
+        }
+        
+        .summary-text .node.Critical:before {
+            background: #e81e1e;
+        }
+        
+        .summary-text .node.High:before {
+            background: #E91E63;
+        }
+        
+        .summary-text .node.Medium:before {
+            background: #FFA726;
+        }
+        
+        .summary-text .node.Low:before {
+            background: #8BC34A;
+        }
+        
+        .summary-text .node.Negligible:before {
+            background: #37474F;
+        }
+        
+        .summary-text .node.Unknown:before {
+            background: #37474F;
+        }
+        
+        .relative-graph {
+            display: flex;
+            max-width: 940px;
+            margin: 0 auto;
+            background: #2196F3;
+            flex-direction: row-reverse;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .relative-graph .node {
+            text-align: center;
+            height: 8px;
+            background: #2196F3;
+        }
+        
+        .relative-graph .node.Defcon1 {
+            background: black;
+        }
+        
+        .relative-graph .node.Critical {
+            background: #e81e1e;
+        }
+        
+        .relative-graph .node.High {
+            background: #E91E63;
+        }
+        
+        .relative-graph .node.Medium {
+            background: #FFA726;
+        }
+        
+        .relative-graph .node.Low {
+            background: #8BC34A;
+        }
+        
+        .relative-graph .node.Negligible {
+            background: #37474F;
+        }
+        
+        .relative-graph .node.Unknown {
+            background: #37474F;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1>Clair Control report</h1>
+        </header>
+
+        <div class="app-intro clearfix">
+            <h2>Image: centos</h2>
+            
+
+            <section class="summary">
+                <div>
+                    
+                    <p><span class="lead"><strong>Total : 50 vulnerabilities</strong></span></p>
+                    </p>
+                    <div class="summary-text">
+                          
+                        <div class="node Low">Low : <strong>5</strong></div>
+                         
+                        <div class="node Medium">Medium : <strong>39</strong></div>
+                         
+                        <div class="node High">High : <strong>6</strong></div>
+                          
+                    </div>
+                    <div class="relative-graph">
+                        <div class="node Defcon1" style="width: 0%"></div>
+                        <div class="node Critical" style="width: 0%"></div>
+                        <div class="node High" style="width: 12%"></div>
+                        <div class="node Medium" style="width: 78%"></div>
+                        <div class="node Low" style="width: 10%"></div>
+                        <div class="node Negligible" style="width: 0%"></div>
+                        <div class="node Unknown" style="width: 0%"></div>
+                    </div>
+                    
+                </div>
+            </section>
+            
+            <div class="graph">
+                
+                
+                <a class="node High" href="#RHSA-2019:2692">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:2692</strong></div>
+                        <div>High</div>
+                        <div>libnghttp2:1.33.0-1.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node High" href="#RHSA-2019:0997">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:0997</strong></div>
+                        <div>High</div>
+                        <div>python3-libs:3.6.8-1.el8.0.1</div>
+                    </div>
+                </a>
+                
+                <a class="node High" href="#RHSA-2019:0997">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:0997</strong></div>
+                        <div>High</div>
+                        <div>platform-python:3.6.8-1.el8.0.1</div>
+                    </div>
+                </a>
+                
+                <a class="node High" href="#RHSA-2019:1619">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:1619</strong></div>
+                        <div>High</div>
+                        <div>vim-minimal:2:8.0.1763-10.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node High" href="#RHSA-2019:1714">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:1714</strong></div>
+                        <div>High</div>
+                        <div>bind-export-libs:32:9.11.4-16.P2.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node High" href="#RHSA-2019:1145">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:1145</strong></div>
+                        <div>High</div>
+                        <div>bind-export-libs:32:9.11.4-16.P2.el8</div>
+                    </div>
+                </a>
+                
+                
+                
+                <a class="node Low" href="#RHSA-2019:3575">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3575</strong></div>
+                        <div>Low</div>
+                        <div>elfutils-default-yama-scope:0.174-6.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#RHSA-2019:3700">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3700</strong></div>
+                        <div>Low</div>
+                        <div>openssl-libs:1:1.1.1-8.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#RHSA-2019:3575">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3575</strong></div>
+                        <div>Low</div>
+                        <div>elfutils-libs:0.174-6.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#RHSA-2019:3575">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3575</strong></div>
+                        <div>Low</div>
+                        <div>elfutils-libelf:0.174-6.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#RHSA-2019:3552">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3552</strong></div>
+                        <div>Low</div>
+                        <div>bind-export-libs:32:9.11.4-16.P2.el8</div>
+                    </div>
+                </a>
+                
+                
+                
+                <a class="node Medium" href="#RHSA-2019:3583">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3583</strong></div>
+                        <div>Medium</div>
+                        <div>dnf-data:4.0.9.2-5.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3583">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3583</strong></div>
+                        <div>Medium</div>
+                        <div>python3-libcomps:0.1.8-13.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3707">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3707</strong></div>
+                        <div>Medium</div>
+                        <div>dbus:1:1.12.8-7.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3513">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3513</strong></div>
+                        <div>Medium</div>
+                        <div>glibc:2.28-42.el8.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3583">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3583</strong></div>
+                        <div>Medium</div>
+                        <div>python3-dnf:4.0.9.2-5.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3592">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3592</strong></div>
+                        <div>Medium</div>
+                        <div>systemd-udev:239-13.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:0990">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:0990</strong></div>
+                        <div>Medium</div>
+                        <div>systemd-udev:239-13.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3707">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3707</strong></div>
+                        <div>Medium</div>
+                        <div>dbus-common:1:1.12.8-7.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3530">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3530</strong></div>
+                        <div>Medium</div>
+                        <div>glib2:2.56.4-1.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3583">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3583</strong></div>
+                        <div>Medium</div>
+                        <div>libdnf:0.22.5-4.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3525">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3525</strong></div>
+                        <div>Medium</div>
+                        <div>dhcp-client:12:4.3.6-30.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3583">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3583</strong></div>
+                        <div>Medium</div>
+                        <div>librepo:1.9.2-1.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3592">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3592</strong></div>
+                        <div>Medium</div>
+                        <div>systemd-libs:239-13.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:0990">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:0990</strong></div>
+                        <div>Medium</div>
+                        <div>systemd-libs:239-13.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3520">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3520</strong></div>
+                        <div>Medium</div>
+                        <div>python3-libs:3.6.8-1.el8.0.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3701">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3701</strong></div>
+                        <div>Medium</div>
+                        <div>curl:7.61.1-8.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3520">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3520</strong></div>
+                        <div>Medium</div>
+                        <div>platform-python:3.6.8-1.el8.0.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3707">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3707</strong></div>
+                        <div>Medium</div>
+                        <div>dbus-tools:1:1.12.8-7.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3701">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3701</strong></div>
+                        <div>Medium</div>
+                        <div>libcurl-minimal:7.61.1-8.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3698">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3698</strong></div>
+                        <div>Medium</div>
+                        <div>libarchive:3.3.2-3.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3592">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3592</strong></div>
+                        <div>Medium</div>
+                        <div>systemd-pam:239-13.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:0990">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:0990</strong></div>
+                        <div>Medium</div>
+                        <div>systemd-pam:239-13.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3525">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3525</strong></div>
+                        <div>Medium</div>
+                        <div>dhcp-libs:12:4.3.6-30.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3583">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3583</strong></div>
+                        <div>Medium</div>
+                        <div>libsolv:0.6.35-6.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3600">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3600</strong></div>
+                        <div>Medium</div>
+                        <div>gnutls:3.6.5-2.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3583">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3583</strong></div>
+                        <div>Medium</div>
+                        <div>yum:4.0.9.2-5.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3707">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3707</strong></div>
+                        <div>Medium</div>
+                        <div>dbus-daemon:1:1.12.8-7.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3592">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3592</strong></div>
+                        <div>Medium</div>
+                        <div>systemd:239-13.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:0990">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:0990</strong></div>
+                        <div>Medium</div>
+                        <div>systemd:239-13.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3583">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3583</strong></div>
+                        <div>Medium</div>
+                        <div>dnf:4.0.9.2-5.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3624">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3624</strong></div>
+                        <div>Medium</div>
+                        <div>libseccomp:2.3.3-3.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3513">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3513</strong></div>
+                        <div>Medium</div>
+                        <div>glibc-common:2.28-42.el8.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3583">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3583</strong></div>
+                        <div>Medium</div>
+                        <div>python3-hawkey:0.22.5-4.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3707">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3707</strong></div>
+                        <div>Medium</div>
+                        <div>dbus-libs:1:1.12.8-7.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3583">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3583</strong></div>
+                        <div>Medium</div>
+                        <div>python3-libdnf:0.22.5-4.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3525">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3525</strong></div>
+                        <div>Medium</div>
+                        <div>dhcp-common:12:4.3.6-30.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3706">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3706</strong></div>
+                        <div>Medium</div>
+                        <div>lua-libs:5.3.4-10.el8</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3513">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3513</strong></div>
+                        <div>Medium</div>
+                        <div>glibc-minimal-langpack:2.28-42.el8.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#RHSA-2019:3583">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>RHSA-2019:3583</strong></div>
+                        <div>Medium</div>
+                        <div>libcomps:0.1.8-13.el8</div>
+                    </div>
+                </a>
+                
+                
+            </div>
+        </div>
+
+        <section class="report">
+            <div>
+                <div class="panel">
+                    <div class="layers">
+                        <div id="efbcd294f1b19fe15916719b63eee211c68837d4262d4d405508ca07b40bf6c1" class="layer">
+                            <h3 class="layer__title" data-toggle-layer="efbcd294f1b19fe15916719b63eee211c68837d4262d4d405508ca07b40bf6c1">efbcd294f1b19fe15916719b63eee211c68837d4262d4d405508ca07b40bf6c1</h3>
+                            <div class="features">
+                                <ul>
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dnf-data</strong> <span>4.0.9.2-5.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3583"></a>
+                                                <strong class="name">RHSA-2019:3583</strong>
+                                                <div>Yum is a command-line utility that allows the user to check for updates and automatically download and install updated RPM packages. Yum automatically obtains and downloads dependencies, prompting the user for permission as necessary.  The following packages have been upgraded to a later upstream version: dnf (4.2.7), dnf-plugins-core (4.0.8), libcomps (0.1.11), libdnf (0.35.1), librepo (1.10.3), libsolv (0.7.4). (BZ#1690288, BZ#1690289, BZ#1690299, BZ#1692402, BZ#1694019, BZ#1697946) Security Fix(es): * libcomps: use after free when merging two objmrtrees (CVE-2019-3817) * libsolv: illegal address access in pool_whatprovides in src/pool.h (CVE-2018-20534) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3583" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>elfutils-default-yama-scope</strong> <span>0.174-6.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="RHSA-2019:3575"></a>
+                                                <strong class="name">RHSA-2019:3575</strong>
+                                                <div>The elfutils packages contain a number of utility programs and libraries related to the creation and maintenance of executable code. The following packages have been upgraded to a later upstream version: elfutils (0.176). (BZ#1683705) Security Fix(es): * elfutils: buffer over-read in the ebl_object_note function in eblobjnote.c in libebl (CVE-2019-7146) * elfutils: heap-based buffer over-read in read_srclines in dwarf_getsrclines.c in libdw (CVE-2019-7149) * elfutils: segmentation fault in elf64_xlatetom in libelf/elf32_xlatetom.c (CVE-2019-7150) * elfutils: out of bound write in elf_cvt_note in libelf/note_xlate.h (CVE-2019-7664) * elfutils: heap-based buffer over-read in function elf32_xlatetom in elf32_xlatetom.c (CVE-2019-7665) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3575" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>python3-libcomps</strong> <span>0.1.8-13.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3583"></a>
+                                                <strong class="name">RHSA-2019:3583</strong>
+                                                <div>Yum is a command-line utility that allows the user to check for updates and automatically download and install updated RPM packages. Yum automatically obtains and downloads dependencies, prompting the user for permission as necessary.  The following packages have been upgraded to a later upstream version: dnf (4.2.7), dnf-plugins-core (4.0.8), libcomps (0.1.11), libdnf (0.35.1), librepo (1.10.3), libsolv (0.7.4). (BZ#1690288, BZ#1690289, BZ#1690299, BZ#1692402, BZ#1694019, BZ#1697946) Security Fix(es): * libcomps: use after free when merging two objmrtrees (CVE-2019-3817) * libsolv: illegal address access in pool_whatprovides in src/pool.h (CVE-2018-20534) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3583" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dbus</strong> <span>1:1.12.8-7.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3707"></a>
+                                                <strong class="name">RHSA-2019:3707</strong>
+                                                <div>D-Bus is a system for sending messages between applications. It is used both for the system-wide message bus service, and as a per-user-login-session messaging facility. Security Fix(es): * dbus: DBusServer DBUS_COOKIE_SHA1 authentication bypass (CVE-2019-12749) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3707" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>glibc</strong> <span>2.28-42.el8.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3513"></a>
+                                                <strong class="name">RHSA-2019:3513</strong>
+                                                <div>The glibc packages provide the standard C libraries (libc), POSIX thread libraries (libpthread), standard math libraries (libm), and the name service cache daemon (nscd) used by multiple programs on the system. Without these libraries, the Linux system cannot function correctly. Security Fix(es): * glibc: getaddrinfo should reject IP addresses with trailing characters (CVE-2016-10739) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3513" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>python3-dnf</strong> <span>4.0.9.2-5.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3583"></a>
+                                                <strong class="name">RHSA-2019:3583</strong>
+                                                <div>Yum is a command-line utility that allows the user to check for updates and automatically download and install updated RPM packages. Yum automatically obtains and downloads dependencies, prompting the user for permission as necessary.  The following packages have been upgraded to a later upstream version: dnf (4.2.7), dnf-plugins-core (4.0.8), libcomps (0.1.11), libdnf (0.35.1), librepo (1.10.3), libsolv (0.7.4). (BZ#1690288, BZ#1690289, BZ#1690299, BZ#1692402, BZ#1694019, BZ#1697946) Security Fix(es): * libcomps: use after free when merging two objmrtrees (CVE-2019-3817) * libsolv: illegal address access in pool_whatprovides in src/pool.h (CVE-2018-20534) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3583" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>systemd-udev</strong> <span>239-13.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3592"></a>
+                                                <strong class="name">RHSA-2019:3592</strong>
+                                                <div>The systemd packages contain systemd, a system and service manager for Linux, compatible with the SysV and LSB init scripts. It provides aggressive parallelism capabilities, uses socket and D-Bus activation for starting services, offers on-demand starting of daemons, and keeps track of processes using Linux cgroups. In addition, it supports snapshotting and restoring of the system state, maintains mount and automount points, and implements an elaborate transactional dependency-based service control logic. It can also work as a drop-in replacement for sysvinit. Security Fix(es): * systemd: systemd-resolved allows unprivileged users to configure DNS (CVE-2019-15718) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3592" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:0990"></a>
+                                                <strong class="name">RHSA-2019:0990</strong>
+                                                <div>The systemd packages contain systemd, a system and service manager for Linux, compatible with the SysV and LSB init scripts. It provides aggressive parallelism capabilities, uses socket and D-Bus activation for starting services, offers on-demand starting of daemons, and keeps track of processes using Linux cgroups. In addition, it supports snapshotting and restoring of the system state, maintains mount and automount points, and implements an elaborate transactional dependency-based service control logic. It can also work as a drop-in replacement for sysvinit. Security Fix(es): * systemd: Insufficient input validation in bus_process_object() resulting in PID 1 crash (CVE-2019-6454) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Bug Fix(es): * [PATCH] bus-socket: Fix line_begins() to accept word matching full (BZ#1693578)</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:0990" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dbus-common</strong> <span>1:1.12.8-7.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3707"></a>
+                                                <strong class="name">RHSA-2019:3707</strong>
+                                                <div>D-Bus is a system for sending messages between applications. It is used both for the system-wide message bus service, and as a per-user-login-session messaging facility. Security Fix(es): * dbus: DBusServer DBUS_COOKIE_SHA1 authentication bypass (CVE-2019-12749) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3707" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libnghttp2</strong> <span>1.33.0-1.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability High">
+                                                <a class="vulnerability__title" name="RHSA-2019:2692"></a>
+                                                <strong class="name">RHSA-2019:2692</strong>
+                                                <div>libnghttp2 is a library implementing the Hypertext Transfer Protocol version 2 (HTTP/2) protocol in C. Security Fix(es): * HTTP/2: large amount of data request leads to denial of service (CVE-2019-9511) * HTTP/2: flood using PRIORITY frames resulting in excessive resource consumption (CVE-2019-9513) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:2692" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>glib2</strong> <span>2.56.4-1.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3530"></a>
+                                                <strong class="name">RHSA-2019:3530</strong>
+                                                <div>GLib provides the core application building blocks for libraries and applications written in C. It provides the core object system used in GNOME, the main loop implementation, and a large set of utility functions for strings and common data structures. Security Fix(es): * glib2: file_copy_fallback in gio/gfile.c in GNOME GLib does not properly restrict file permissions while a copy operation is in progress (CVE-2019-12450) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3530" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libdnf</strong> <span>0.22.5-4.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3583"></a>
+                                                <strong class="name">RHSA-2019:3583</strong>
+                                                <div>Yum is a command-line utility that allows the user to check for updates and automatically download and install updated RPM packages. Yum automatically obtains and downloads dependencies, prompting the user for permission as necessary.  The following packages have been upgraded to a later upstream version: dnf (4.2.7), dnf-plugins-core (4.0.8), libcomps (0.1.11), libdnf (0.35.1), librepo (1.10.3), libsolv (0.7.4). (BZ#1690288, BZ#1690289, BZ#1690299, BZ#1692402, BZ#1694019, BZ#1697946) Security Fix(es): * libcomps: use after free when merging two objmrtrees (CVE-2019-3817) * libsolv: illegal address access in pool_whatprovides in src/pool.h (CVE-2018-20534) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3583" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>openssl-libs</strong> <span>1:1.1.1-8.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="RHSA-2019:3700"></a>
+                                                <strong class="name">RHSA-2019:3700</strong>
+                                                <div>OpenSSL is a toolkit that implements the Secure Sockets Layer (SSL) and Transport Layer Security (TLS) protocols, as well as a full-strength general-purpose cryptography library. The following packages have been upgraded to a later upstream version: openssl (1.1.1c). (BZ#1643026) Security Fix(es): * openssl: timing side channel attack in the DSA signature algorithm (CVE-2018-0734) * openssl: timing side channel attack in the ECDSA signature generation (CVE-2018-0735) * openssl: ChaCha20-Poly1305 with long nonces (CVE-2019-1543) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3700" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dhcp-client</strong> <span>12:4.3.6-30.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3525"></a>
+                                                <strong class="name">RHSA-2019:3525</strong>
+                                                <div>The Dynamic Host Configuration Protocol (DHCP) is a protocol that allows individual devices on an IP network to get their own network configuration information, including an IP address, a subnet mask, and a broadcast address. The dhcp packages provide a relay agent and ISC DHCP service required to enable and administer DHCP on a network. Security Fix(es): * dhcp: double-deletion of the released addresses in the dhcpv6 code leading to crash and possible DoS (CVE-2019-6470) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3525" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>librepo</strong> <span>1.9.2-1.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3583"></a>
+                                                <strong class="name">RHSA-2019:3583</strong>
+                                                <div>Yum is a command-line utility that allows the user to check for updates and automatically download and install updated RPM packages. Yum automatically obtains and downloads dependencies, prompting the user for permission as necessary.  The following packages have been upgraded to a later upstream version: dnf (4.2.7), dnf-plugins-core (4.0.8), libcomps (0.1.11), libdnf (0.35.1), librepo (1.10.3), libsolv (0.7.4). (BZ#1690288, BZ#1690289, BZ#1690299, BZ#1692402, BZ#1694019, BZ#1697946) Security Fix(es): * libcomps: use after free when merging two objmrtrees (CVE-2019-3817) * libsolv: illegal address access in pool_whatprovides in src/pool.h (CVE-2018-20534) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3583" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>systemd-libs</strong> <span>239-13.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3592"></a>
+                                                <strong class="name">RHSA-2019:3592</strong>
+                                                <div>The systemd packages contain systemd, a system and service manager for Linux, compatible with the SysV and LSB init scripts. It provides aggressive parallelism capabilities, uses socket and D-Bus activation for starting services, offers on-demand starting of daemons, and keeps track of processes using Linux cgroups. In addition, it supports snapshotting and restoring of the system state, maintains mount and automount points, and implements an elaborate transactional dependency-based service control logic. It can also work as a drop-in replacement for sysvinit. Security Fix(es): * systemd: systemd-resolved allows unprivileged users to configure DNS (CVE-2019-15718) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3592" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:0990"></a>
+                                                <strong class="name">RHSA-2019:0990</strong>
+                                                <div>The systemd packages contain systemd, a system and service manager for Linux, compatible with the SysV and LSB init scripts. It provides aggressive parallelism capabilities, uses socket and D-Bus activation for starting services, offers on-demand starting of daemons, and keeps track of processes using Linux cgroups. In addition, it supports snapshotting and restoring of the system state, maintains mount and automount points, and implements an elaborate transactional dependency-based service control logic. It can also work as a drop-in replacement for sysvinit. Security Fix(es): * systemd: Insufficient input validation in bus_process_object() resulting in PID 1 crash (CVE-2019-6454) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Bug Fix(es): * [PATCH] bus-socket: Fix line_begins() to accept word matching full (BZ#1693578)</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:0990" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>python3-libs</strong> <span>3.6.8-1.el8.0.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability High">
+                                                <a class="vulnerability__title" name="RHSA-2019:0997"></a>
+                                                <strong class="name">RHSA-2019:0997</strong>
+                                                <div>Python is an interpreted, interactive, object-oriented programming language, which includes modules, classes, exceptions, very high level dynamic data types and dynamic typing. Python supports interfaces to many system calls and libraries, as well as to various windowing systems.  This package provides the "python3" executable: the reference interpreter for the Python language, version 3. The majority of its standard library is provided in the python3-libs package, which should be installed automatically along with python3. The remaining parts of the Python standard library are broken out into the python3-tkinter and python3-test packages. Security Fix(es): * python: Information Disclosure due to urlsplit improper NFKC normalization (CVE-2019-9636) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:0997" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3520"></a>
+                                                <strong class="name">RHSA-2019:3520</strong>
+                                                <div>Python is an interpreted, interactive, object-oriented programming language, which includes modules, classes, exceptions, very high level dynamic data types and dynamic typing. Python supports interfaces to many system calls and libraries, as well as to various windowing systems. Security Fix(es): * python: NULL pointer dereference using a specially crafted X509 certificate (CVE-2019-5010) * python: CRLF injection via the query part of the url passed to urlopen() (CVE-2019-9740) * python: CRLF injection via the path part of the url passed to urlopen() (CVE-2019-9947) * python: Undocumented local_file protocol allows remote attackers to bypass protection mechanisms (CVE-2019-9948) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3520" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>curl</strong> <span>7.61.1-8.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3701"></a>
+                                                <strong class="name">RHSA-2019:3701</strong>
+                                                <div>The curl packages provide the libcurl library and the curl utility for downloading files from servers using various protocols, including HTTP, FTP, and LDAP. Security Fix(es): * curl: NTLM type-2 heap out-of-bounds buffer read (CVE-2018-16890) * wget: Information exposure in set_file_metadata function in xattr.c (CVE-2018-20483) * curl: NTLMv2 type-3 header stack buffer overflow (CVE-2019-3822) * curl: SMTP end-of-response out-of-bounds read (CVE-2019-3823) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3701" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>platform-python</strong> <span>3.6.8-1.el8.0.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability High">
+                                                <a class="vulnerability__title" name="RHSA-2019:0997"></a>
+                                                <strong class="name">RHSA-2019:0997</strong>
+                                                <div>Python is an interpreted, interactive, object-oriented programming language, which includes modules, classes, exceptions, very high level dynamic data types and dynamic typing. Python supports interfaces to many system calls and libraries, as well as to various windowing systems.  This package provides the "python3" executable: the reference interpreter for the Python language, version 3. The majority of its standard library is provided in the python3-libs package, which should be installed automatically along with python3. The remaining parts of the Python standard library are broken out into the python3-tkinter and python3-test packages. Security Fix(es): * python: Information Disclosure due to urlsplit improper NFKC normalization (CVE-2019-9636) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:0997" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3520"></a>
+                                                <strong class="name">RHSA-2019:3520</strong>
+                                                <div>Python is an interpreted, interactive, object-oriented programming language, which includes modules, classes, exceptions, very high level dynamic data types and dynamic typing. Python supports interfaces to many system calls and libraries, as well as to various windowing systems. Security Fix(es): * python: NULL pointer dereference using a specially crafted X509 certificate (CVE-2019-5010) * python: CRLF injection via the query part of the url passed to urlopen() (CVE-2019-9740) * python: CRLF injection via the path part of the url passed to urlopen() (CVE-2019-9947) * python: Undocumented local_file protocol allows remote attackers to bypass protection mechanisms (CVE-2019-9948) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3520" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dbus-tools</strong> <span>1:1.12.8-7.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3707"></a>
+                                                <strong class="name">RHSA-2019:3707</strong>
+                                                <div>D-Bus is a system for sending messages between applications. It is used both for the system-wide message bus service, and as a per-user-login-session messaging facility. Security Fix(es): * dbus: DBusServer DBUS_COOKIE_SHA1 authentication bypass (CVE-2019-12749) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3707" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libcurl-minimal</strong> <span>7.61.1-8.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3701"></a>
+                                                <strong class="name">RHSA-2019:3701</strong>
+                                                <div>The curl packages provide the libcurl library and the curl utility for downloading files from servers using various protocols, including HTTP, FTP, and LDAP. Security Fix(es): * curl: NTLM type-2 heap out-of-bounds buffer read (CVE-2018-16890) * wget: Information exposure in set_file_metadata function in xattr.c (CVE-2018-20483) * curl: NTLMv2 type-3 header stack buffer overflow (CVE-2019-3822) * curl: SMTP end-of-response out-of-bounds read (CVE-2019-3823) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3701" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libarchive</strong> <span>3.3.2-3.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3698"></a>
+                                                <strong class="name">RHSA-2019:3698</strong>
+                                                <div>The libarchive programming library can create and read several different streaming archive formats, including GNU tar, cpio, and ISO 9660 CD-ROM images. Libarchive is used notably in the bsdtar utility, scripting language bindings such as python-libarchive, and several popular desktop file managers. Security Fix(es): * libarchive: Double free in RAR decoder resulting in a denial of service (CVE-2018-1000877) * libarchive: Use after free in RAR decoder resulting in a denial of service (CVE-2018-1000878) * libarchive: Out of bounds read in archive_read_support_format_7zip.c resulting in a denial of service (CVE-2019-1000019) * libarchive: Infinite recursion in archive_read_support_format_iso9660.c resulting in denial of service (CVE-2019-1000020) * libarchive: Out-of-bounds read in lha_read_data_none (CVE-2017-14503) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3698" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>systemd-pam</strong> <span>239-13.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3592"></a>
+                                                <strong class="name">RHSA-2019:3592</strong>
+                                                <div>The systemd packages contain systemd, a system and service manager for Linux, compatible with the SysV and LSB init scripts. It provides aggressive parallelism capabilities, uses socket and D-Bus activation for starting services, offers on-demand starting of daemons, and keeps track of processes using Linux cgroups. In addition, it supports snapshotting and restoring of the system state, maintains mount and automount points, and implements an elaborate transactional dependency-based service control logic. It can also work as a drop-in replacement for sysvinit. Security Fix(es): * systemd: systemd-resolved allows unprivileged users to configure DNS (CVE-2019-15718) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3592" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:0990"></a>
+                                                <strong class="name">RHSA-2019:0990</strong>
+                                                <div>The systemd packages contain systemd, a system and service manager for Linux, compatible with the SysV and LSB init scripts. It provides aggressive parallelism capabilities, uses socket and D-Bus activation for starting services, offers on-demand starting of daemons, and keeps track of processes using Linux cgroups. In addition, it supports snapshotting and restoring of the system state, maintains mount and automount points, and implements an elaborate transactional dependency-based service control logic. It can also work as a drop-in replacement for sysvinit. Security Fix(es): * systemd: Insufficient input validation in bus_process_object() resulting in PID 1 crash (CVE-2019-6454) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Bug Fix(es): * [PATCH] bus-socket: Fix line_begins() to accept word matching full (BZ#1693578)</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:0990" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dhcp-libs</strong> <span>12:4.3.6-30.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3525"></a>
+                                                <strong class="name">RHSA-2019:3525</strong>
+                                                <div>The Dynamic Host Configuration Protocol (DHCP) is a protocol that allows individual devices on an IP network to get their own network configuration information, including an IP address, a subnet mask, and a broadcast address. The dhcp packages provide a relay agent and ISC DHCP service required to enable and administer DHCP on a network. Security Fix(es): * dhcp: double-deletion of the released addresses in the dhcpv6 code leading to crash and possible DoS (CVE-2019-6470) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3525" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libsolv</strong> <span>0.6.35-6.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3583"></a>
+                                                <strong class="name">RHSA-2019:3583</strong>
+                                                <div>Yum is a command-line utility that allows the user to check for updates and automatically download and install updated RPM packages. Yum automatically obtains and downloads dependencies, prompting the user for permission as necessary.  The following packages have been upgraded to a later upstream version: dnf (4.2.7), dnf-plugins-core (4.0.8), libcomps (0.1.11), libdnf (0.35.1), librepo (1.10.3), libsolv (0.7.4). (BZ#1690288, BZ#1690289, BZ#1690299, BZ#1692402, BZ#1694019, BZ#1697946) Security Fix(es): * libcomps: use after free when merging two objmrtrees (CVE-2019-3817) * libsolv: illegal address access in pool_whatprovides in src/pool.h (CVE-2018-20534) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3583" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>gnutls</strong> <span>3.6.5-2.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3600"></a>
+                                                <strong class="name">RHSA-2019:3600</strong>
+                                                <div>The gnutls packages provide the GNU Transport Layer Security (GnuTLS) library, which implements cryptographic algorithms and protocols such as SSL, TLS, and DTLS. The following packages have been upgraded to a later upstream version: gnutls (3.6.8). (BZ#1689967) Security Fix(es): * gnutls: use-after-free/double-free in certificate verification (CVE-2019-3829) * gnutls: invalid pointer access upon receiving async handshake messages (CVE-2019-3836) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3600" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>yum</strong> <span>4.0.9.2-5.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3583"></a>
+                                                <strong class="name">RHSA-2019:3583</strong>
+                                                <div>Yum is a command-line utility that allows the user to check for updates and automatically download and install updated RPM packages. Yum automatically obtains and downloads dependencies, prompting the user for permission as necessary.  The following packages have been upgraded to a later upstream version: dnf (4.2.7), dnf-plugins-core (4.0.8), libcomps (0.1.11), libdnf (0.35.1), librepo (1.10.3), libsolv (0.7.4). (BZ#1690288, BZ#1690289, BZ#1690299, BZ#1692402, BZ#1694019, BZ#1697946) Security Fix(es): * libcomps: use after free when merging two objmrtrees (CVE-2019-3817) * libsolv: illegal address access in pool_whatprovides in src/pool.h (CVE-2018-20534) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3583" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dbus-daemon</strong> <span>1:1.12.8-7.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3707"></a>
+                                                <strong class="name">RHSA-2019:3707</strong>
+                                                <div>D-Bus is a system for sending messages between applications. It is used both for the system-wide message bus service, and as a per-user-login-session messaging facility. Security Fix(es): * dbus: DBusServer DBUS_COOKIE_SHA1 authentication bypass (CVE-2019-12749) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3707" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>systemd</strong> <span>239-13.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3592"></a>
+                                                <strong class="name">RHSA-2019:3592</strong>
+                                                <div>The systemd packages contain systemd, a system and service manager for Linux, compatible with the SysV and LSB init scripts. It provides aggressive parallelism capabilities, uses socket and D-Bus activation for starting services, offers on-demand starting of daemons, and keeps track of processes using Linux cgroups. In addition, it supports snapshotting and restoring of the system state, maintains mount and automount points, and implements an elaborate transactional dependency-based service control logic. It can also work as a drop-in replacement for sysvinit. Security Fix(es): * systemd: systemd-resolved allows unprivileged users to configure DNS (CVE-2019-15718) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3592" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:0990"></a>
+                                                <strong class="name">RHSA-2019:0990</strong>
+                                                <div>The systemd packages contain systemd, a system and service manager for Linux, compatible with the SysV and LSB init scripts. It provides aggressive parallelism capabilities, uses socket and D-Bus activation for starting services, offers on-demand starting of daemons, and keeps track of processes using Linux cgroups. In addition, it supports snapshotting and restoring of the system state, maintains mount and automount points, and implements an elaborate transactional dependency-based service control logic. It can also work as a drop-in replacement for sysvinit. Security Fix(es): * systemd: Insufficient input validation in bus_process_object() resulting in PID 1 crash (CVE-2019-6454) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Bug Fix(es): * [PATCH] bus-socket: Fix line_begins() to accept word matching full (BZ#1693578)</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:0990" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>elfutils-libs</strong> <span>0.174-6.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="RHSA-2019:3575"></a>
+                                                <strong class="name">RHSA-2019:3575</strong>
+                                                <div>The elfutils packages contain a number of utility programs and libraries related to the creation and maintenance of executable code. The following packages have been upgraded to a later upstream version: elfutils (0.176). (BZ#1683705) Security Fix(es): * elfutils: buffer over-read in the ebl_object_note function in eblobjnote.c in libebl (CVE-2019-7146) * elfutils: heap-based buffer over-read in read_srclines in dwarf_getsrclines.c in libdw (CVE-2019-7149) * elfutils: segmentation fault in elf64_xlatetom in libelf/elf32_xlatetom.c (CVE-2019-7150) * elfutils: out of bound write in elf_cvt_note in libelf/note_xlate.h (CVE-2019-7664) * elfutils: heap-based buffer over-read in function elf32_xlatetom in elf32_xlatetom.c (CVE-2019-7665) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3575" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dnf</strong> <span>4.0.9.2-5.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3583"></a>
+                                                <strong class="name">RHSA-2019:3583</strong>
+                                                <div>Yum is a command-line utility that allows the user to check for updates and automatically download and install updated RPM packages. Yum automatically obtains and downloads dependencies, prompting the user for permission as necessary.  The following packages have been upgraded to a later upstream version: dnf (4.2.7), dnf-plugins-core (4.0.8), libcomps (0.1.11), libdnf (0.35.1), librepo (1.10.3), libsolv (0.7.4). (BZ#1690288, BZ#1690289, BZ#1690299, BZ#1692402, BZ#1694019, BZ#1697946) Security Fix(es): * libcomps: use after free when merging two objmrtrees (CVE-2019-3817) * libsolv: illegal address access in pool_whatprovides in src/pool.h (CVE-2018-20534) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3583" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libseccomp</strong> <span>2.3.3-3.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3624"></a>
+                                                <strong class="name">RHSA-2019:3624</strong>
+                                                <div>The libseccomp library provides an interface to the Linux Kernel's syscall filtering mechanism, seccomp. The libseccomp API allows an application to specify which system calls or system call arguments the application is allowed to execute, all of which are then enforced by the Linux Kernel. The following packages have been upgraded to a later upstream version: libseccomp (2.4.1). (BZ#1688938) Security Fix(es): * libseccomp: incorrect generation of syscall filters in libseccomp (CVE-2019-9893) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3624" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>glibc-common</strong> <span>2.28-42.el8.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3513"></a>
+                                                <strong class="name">RHSA-2019:3513</strong>
+                                                <div>The glibc packages provide the standard C libraries (libc), POSIX thread libraries (libpthread), standard math libraries (libm), and the name service cache daemon (nscd) used by multiple programs on the system. Without these libraries, the Linux system cannot function correctly. Security Fix(es): * glibc: getaddrinfo should reject IP addresses with trailing characters (CVE-2016-10739) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3513" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>python3-hawkey</strong> <span>0.22.5-4.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3583"></a>
+                                                <strong class="name">RHSA-2019:3583</strong>
+                                                <div>Yum is a command-line utility that allows the user to check for updates and automatically download and install updated RPM packages. Yum automatically obtains and downloads dependencies, prompting the user for permission as necessary.  The following packages have been upgraded to a later upstream version: dnf (4.2.7), dnf-plugins-core (4.0.8), libcomps (0.1.11), libdnf (0.35.1), librepo (1.10.3), libsolv (0.7.4). (BZ#1690288, BZ#1690289, BZ#1690299, BZ#1692402, BZ#1694019, BZ#1697946) Security Fix(es): * libcomps: use after free when merging two objmrtrees (CVE-2019-3817) * libsolv: illegal address access in pool_whatprovides in src/pool.h (CVE-2018-20534) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3583" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>elfutils-libelf</strong> <span>0.174-6.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="RHSA-2019:3575"></a>
+                                                <strong class="name">RHSA-2019:3575</strong>
+                                                <div>The elfutils packages contain a number of utility programs and libraries related to the creation and maintenance of executable code. The following packages have been upgraded to a later upstream version: elfutils (0.176). (BZ#1683705) Security Fix(es): * elfutils: buffer over-read in the ebl_object_note function in eblobjnote.c in libebl (CVE-2019-7146) * elfutils: heap-based buffer over-read in read_srclines in dwarf_getsrclines.c in libdw (CVE-2019-7149) * elfutils: segmentation fault in elf64_xlatetom in libelf/elf32_xlatetom.c (CVE-2019-7150) * elfutils: out of bound write in elf_cvt_note in libelf/note_xlate.h (CVE-2019-7664) * elfutils: heap-based buffer over-read in function elf32_xlatetom in elf32_xlatetom.c (CVE-2019-7665) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3575" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dbus-libs</strong> <span>1:1.12.8-7.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3707"></a>
+                                                <strong class="name">RHSA-2019:3707</strong>
+                                                <div>D-Bus is a system for sending messages between applications. It is used both for the system-wide message bus service, and as a per-user-login-session messaging facility. Security Fix(es): * dbus: DBusServer DBUS_COOKIE_SHA1 authentication bypass (CVE-2019-12749) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3707" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>python3-libdnf</strong> <span>0.22.5-4.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3583"></a>
+                                                <strong class="name">RHSA-2019:3583</strong>
+                                                <div>Yum is a command-line utility that allows the user to check for updates and automatically download and install updated RPM packages. Yum automatically obtains and downloads dependencies, prompting the user for permission as necessary.  The following packages have been upgraded to a later upstream version: dnf (4.2.7), dnf-plugins-core (4.0.8), libcomps (0.1.11), libdnf (0.35.1), librepo (1.10.3), libsolv (0.7.4). (BZ#1690288, BZ#1690289, BZ#1690299, BZ#1692402, BZ#1694019, BZ#1697946) Security Fix(es): * libcomps: use after free when merging two objmrtrees (CVE-2019-3817) * libsolv: illegal address access in pool_whatprovides in src/pool.h (CVE-2018-20534) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3583" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dhcp-common</strong> <span>12:4.3.6-30.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3525"></a>
+                                                <strong class="name">RHSA-2019:3525</strong>
+                                                <div>The Dynamic Host Configuration Protocol (DHCP) is a protocol that allows individual devices on an IP network to get their own network configuration information, including an IP address, a subnet mask, and a broadcast address. The dhcp packages provide a relay agent and ISC DHCP service required to enable and administer DHCP on a network. Security Fix(es): * dhcp: double-deletion of the released addresses in the dhcpv6 code leading to crash and possible DoS (CVE-2019-6470) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3525" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>lua-libs</strong> <span>5.3.4-10.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3706"></a>
+                                                <strong class="name">RHSA-2019:3706</strong>
+                                                <div>The lua packages provide support for Lua, a powerful light-weight programming language designed for extending applications. Lua is also frequently used as a general-purpose, stand-alone language. Security Fix(es): * lua: use-after-free in lua_upvaluejoin in lapi.c resulting in denial of service (CVE-2019-6706) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3706" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>glibc-minimal-langpack</strong> <span>2.28-42.el8.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3513"></a>
+                                                <strong class="name">RHSA-2019:3513</strong>
+                                                <div>The glibc packages provide the standard C libraries (libc), POSIX thread libraries (libpthread), standard math libraries (libm), and the name service cache daemon (nscd) used by multiple programs on the system. Without these libraries, the Linux system cannot function correctly. Security Fix(es): * glibc: getaddrinfo should reject IP addresses with trailing characters (CVE-2016-10739) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3513" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>vim-minimal</strong> <span>2:8.0.1763-10.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability High">
+                                                <a class="vulnerability__title" name="RHSA-2019:1619"></a>
+                                                <strong class="name">RHSA-2019:1619</strong>
+                                                <div>Vim (Vi IMproved) is an updated and improved version of the vi editor. Security Fix(es): * vim/neovim: ':source!' command allows arbitrary command execution via modelines (CVE-2019-12735) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:1619" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libcomps</strong> <span>0.1.8-13.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="RHSA-2019:3583"></a>
+                                                <strong class="name">RHSA-2019:3583</strong>
+                                                <div>Yum is a command-line utility that allows the user to check for updates and automatically download and install updated RPM packages. Yum automatically obtains and downloads dependencies, prompting the user for permission as necessary.  The following packages have been upgraded to a later upstream version: dnf (4.2.7), dnf-plugins-core (4.0.8), libcomps (0.1.11), libdnf (0.35.1), librepo (1.10.3), libsolv (0.7.4). (BZ#1690288, BZ#1690289, BZ#1690299, BZ#1692402, BZ#1694019, BZ#1697946) Security Fix(es): * libcomps: use after free when merging two objmrtrees (CVE-2019-3817) * libsolv: illegal address access in pool_whatprovides in src/pool.h (CVE-2018-20534) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3583" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>bind-export-libs</strong> <span>32:9.11.4-16.P2.el8</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability High">
+                                                <a class="vulnerability__title" name="RHSA-2019:1714"></a>
+                                                <strong class="name">RHSA-2019:1714</strong>
+                                                <div>The Berkeley Internet Name Domain (BIND) is an implementation of the Domain Name System (DNS) protocols. BIND includes a DNS server (named); a resolver library (routines for applications to use when interfacing with DNS); and tools for verifying that the DNS server is operating correctly. Security Fix(es): * bind: Race condition when discarding malformed packets can cause bind to exit with assertion failure (CVE-2019-6471) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:1714" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability High">
+                                                <a class="vulnerability__title" name="RHSA-2019:1145"></a>
+                                                <strong class="name">RHSA-2019:1145</strong>
+                                                <div>The Berkeley Internet Name Domain (BIND) is an implementation of the Domain Name System (DNS) protocols. BIND includes a DNS server (named); a resolver library (routines for applications to use when interfacing with DNS); and tools for verifying that the DNS server is operating correctly. Security Fix(es): * bind: Limiting simultaneous TCP clients is ineffective (CVE-2018-5743) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:1145" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="RHSA-2019:3552"></a>
+                                                <strong class="name">RHSA-2019:3552</strong>
+                                                <div>The Berkeley Internet Name Domain (BIND) is an implementation of the Domain Name System (DNS) protocols. BIND includes a DNS server (named); a resolver library (routines for applications to use when interfacing with DNS); and tools for verifying that the DNS server is operating correctly. Security Fix(es): * bind: An assertion failure if a trust anchor rolls over to an unsupported key algorithm when using managed-keys (CVE-2018-5745) * bind: Controls for zone transfers may not be properly applied to DLZs if the zones are writable (CVE-2019-6465) For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section. Additional Changes: For detailed information on changes in this release, see the Red Hat Enterprise Linux 8.1 Release Notes linked from the References section.</div>
+                                                <a href="https://access.redhat.com/errata/RHSA-2019:3552" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+            </div>
+    </div>
+    </section>
+    </div>
+
+    <script>
+        (function() {
+            const togglers = document.querySelectorAll('[data-toggle-layer]');
+            console.log(togglers);
+
+            for (var i = togglers.length - 1; i >= 0; i--) {
+                togglers[i].onclick = function(e) {
+                    e.target.parentNode.classList.toggle('closed');
+                };
+            }
+        })();
+    </script>
+</body>
+
+</html>

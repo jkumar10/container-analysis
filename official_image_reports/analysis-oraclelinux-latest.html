@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Clair Control report : oraclelinux</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,600italic,400italic,300italic,300' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: ghostwhite;
+            padding-bottom: 2em;
+        }
+        /* Typography */
+        
+        .lead {
+            font-size: 1.4em;
+        }
+        /* global layout */
+        
+        .container {
+            padding: 0 0;
+        }
+        
+        .clearfix:after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+        
+        .row {
+            margin: 0 -20px;
+        }
+        
+        .row:after {
+            display: block;
+            clear: both;
+        }
+        
+        [class*="col-"] {
+            padding: 0 20px;
+            float: left;
+            box-sizing: border-box;
+        }
+        
+        .col-6 {
+            width: 50%;
+        }
+        
+        .panel {
+            /* padding: 1em; */
+            border-radius: 4px;
+            background: white;
+            box-shadow: 0px 1px 2px #e2e2e2;
+        }
+        
+        .panel h2 {
+            margin-top: 0;
+            padding-bottom: .2em;
+            border-bottom: solid 1px gainsboro;
+        }
+        
+        .panel:last-child {
+            margin-bottom: 0;
+        }
+        /* Header */
+        
+        .app-header {
+            background: #2196F3;
+            color: white;
+            margin: 0 0px 0px 0px;
+            padding: 16px 20px;
+            box-shadow: 0 -2px 16px #263238;
+            position: relative;
+        }
+        
+        .app-header h1 {
+            margin: 0;
+            font-weight: lighter;
+            text-transform: uppercase;
+        }
+        
+        .app-intro {
+            padding: 20px;
+            text-align: center;
+            color: #263238;
+            background: rgba(255, 255, 255, .8);
+            border-bottom: solid 1px #ECEFF1;
+        }
+        
+        .app-intro h2 {
+            font-size: 2em;
+            font-weight: lighter;
+        }
+        
+        .summary {
+            line-height: .6em;
+        }
+        /* report */
+        
+        .report {
+            margin-top: 20px;
+        }
+        
+        .graph {
+            margin: 0 auto;
+            max-width: 960px;
+            margin-top: 30px;
+        }
+        /* Style of the graph */
+        
+        .graph .node {
+            position: relative;
+            display: inline-block;
+            height: 24px;
+            width: 24px;
+            margin: 2px;
+        }
+        
+        .graph .node .dot {
+            position: relative;
+            height: 24px;
+            width: 24px;
+            border-radius: 24px;
+            float: left;
+            background: gray;
+            /* box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+        border: solid 1px rgba(255, 255, 255, .2); */
+        }
+        
+        .graph .node.Defcon1 .dot {
+            background: black;
+        }
+        
+        .graph .node.Critical .dot {
+            background: #e81e1e;
+        }
+        
+        .graph .node.High .dot {
+            background: #E91E63;
+        }
+        
+        .graph .node.Medium .dot {
+            background: #FFA726;
+        }
+        
+        .graph .node.Low .dot {
+            background: #8BC34A;
+        }
+        
+        .graph .node.Negligible .dot {
+            background: #37474F;
+        }
+        
+        .graph .node.Unknown .dot {
+            background: #37474F;
+        }
+        
+        .graph .node .popup {
+            display: none;
+            width: 300px;
+            position: absolute;
+            bottom: 100%;
+            margin-bottom: 20px;
+            margin-left: -150px;
+            left: 2px;
+            background: white;
+            box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
+            padding: 10px;
+            border-radius: 4px;
+            /* border: solid 1px #e2e2e2; */
+            text-shadow: 0 0 0 transparent;
+        }
+        
+        .graph .node .popup:after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -10px;
+            display: block;
+            width: 0;
+            height: 0;
+            border-width: 10px 10px 0 10px;
+            border-color: white transparent transparent transparent;
+            border-style: solid;
+        }
+        
+        .graph .node .popup:before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -10px;
+            display: block;
+            width: 0;
+            height: 0;
+            border-width: 11px 11px 0 10px;
+            border-color: rgba(0, 0, 0, .2) transparent transparent transparent;
+            border-style: solid;
+        }
+        
+        .graph .node .popup > div {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .graph .node:hover .dot {
+            opacity: .8;
+        }
+        
+        .graph .node:hover .popup {
+            display: block;
+            max-height: 180px;
+            color: dimgray;
+        }
+        /* bars */
+        
+        .bar-bg {
+            display: inline-block;
+            width: 240px;
+            height: 6px;
+            position: relative;
+        }
+        
+        .bar-bar {
+            display: block;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            background: #E91E63;
+            border-radius: 2px;
+        }
+        
+        .bar-bar.Defcon1 {
+            background: black;
+        }
+        
+        .bar-bar.Critical {
+            background: #e81e1e;
+        }
+        
+        .bar-bar.High {
+            background: #E91E63;
+        }
+        
+        .bar-bar.Medium {
+            background: #FFA726;
+        }
+        
+        .bar-bar.Low {
+            background: #8BC34A;
+        }
+        
+        .bar-bar.Negligible {
+            background: #37474F;
+        }
+        
+        .bar-bar.Unknown {
+            background: #37474F;
+        }
+        /* vulnerabilities */
+        
+        .report {
+            margin: 18px auto;
+            max-width: 960px;
+        }
+        
+        .report .vulnerabilities,
+        .report .features > ul {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .report .features > ul {
+            list-style: none;
+        }
+        
+        .feature {
+            border-bottom: solid 1px #ECEFF1;
+        }
+        
+        .feature:last-child {
+            border-color: #CFD8DC;
+        }
+        
+        .feature__title {
+            padding: 1em;
+        }
+        
+        .vulnerabilities {
+            padding-left: 2.6em !important;
+        }
+        
+        .vulnerability {
+            padding-bottom: .8em;
+            padding-right: 2.2em;
+        }
+        
+        .vulnerabilities .Defcon1 .name {
+            color: black;
+        }
+        
+        .vulnerabilities .Critical .name {
+            color: #e81e1e;
+        }
+        
+        .vulnerabilities .High .name {
+            color: #E91E63;
+        }
+        
+        .vulnerabilities .Medium .name {
+            color: #FFA726;
+        }
+        
+        .vulnerabilities .Low .name {
+            color: #8BC34A;
+        }
+        
+        .vulnerabilities .Negligible .name {
+            color: #37474F;
+        }
+        
+        .vulnerabilities .Unknown .name {
+            color: #37474F;
+        }
+        /* layers */
+        
+        .layer .layer__title {
+            cursor: pointer;
+            padding: 1em;
+            border-bottom: solid 1px #CFD8DC;
+            color: #37474F;
+            margin: 0;
+        }
+        
+        .layer .layer__title:hover {
+            background: #ECEFF1;
+        }
+        
+        .layer.closed .features {
+            display: none;
+        }
+        
+        .summary-text {
+            display: flex;
+            max-width: 940px;
+            margin: 0 auto;
+            margin-bottom: 1em;
+            margin-top: 3em;
+        }
+        
+        .summary-text .node {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .summary-text .node:before {
+            content: '';
+            display: inline-block;
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            background: #2196F3;
+            margin-right: 10px;
+        }
+        
+        .summary-text .node.Defcon1:before {
+            background: black;
+        }
+        
+        .summary-text .node.Critical:before {
+            background: #e81e1e;
+        }
+        
+        .summary-text .node.High:before {
+            background: #E91E63;
+        }
+        
+        .summary-text .node.Medium:before {
+            background: #FFA726;
+        }
+        
+        .summary-text .node.Low:before {
+            background: #8BC34A;
+        }
+        
+        .summary-text .node.Negligible:before {
+            background: #37474F;
+        }
+        
+        .summary-text .node.Unknown:before {
+            background: #37474F;
+        }
+        
+        .relative-graph {
+            display: flex;
+            max-width: 940px;
+            margin: 0 auto;
+            background: #2196F3;
+            flex-direction: row-reverse;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .relative-graph .node {
+            text-align: center;
+            height: 8px;
+            background: #2196F3;
+        }
+        
+        .relative-graph .node.Defcon1 {
+            background: black;
+        }
+        
+        .relative-graph .node.Critical {
+            background: #e81e1e;
+        }
+        
+        .relative-graph .node.High {
+            background: #E91E63;
+        }
+        
+        .relative-graph .node.Medium {
+            background: #FFA726;
+        }
+        
+        .relative-graph .node.Low {
+            background: #8BC34A;
+        }
+        
+        .relative-graph .node.Negligible {
+            background: #37474F;
+        }
+        
+        .relative-graph .node.Unknown {
+            background: #37474F;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1>Clair Control report</h1>
+        </header>
+
+        <div class="app-intro clearfix">
+            <h2>Image: oraclelinux</h2>
+            
+
+            <section class="summary">
+                <div>
+                    
+                    <p><span class="lead"><strong>Total : 32 vulnerabilities</strong></span></p>
+                    </p>
+                    <div class="summary-text">
+                          
+                        <div class="node Low">Low : <strong>8</strong></div>
+                         
+                        <div class="node Medium">Medium : <strong>24</strong></div>
+                           
+                    </div>
+                    <div class="relative-graph">
+                        <div class="node Defcon1" style="width: 0%"></div>
+                        <div class="node Critical" style="width: 0%"></div>
+                        <div class="node High" style="width: 0%"></div>
+                        <div class="node Medium" style="width: 75%"></div>
+                        <div class="node Low" style="width: 25%"></div>
+                        <div class="node Negligible" style="width: 0%"></div>
+                        <div class="node Unknown" style="width: 0%"></div>
+                    </div>
+                    
+                </div>
+            </section>
+            
+            <div class="graph">
+                
+                
+                <a class="node Low" href="#ELSA-2019-2143">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2143</strong></div>
+                        <div>Low</div>
+                        <div>openssh:7.4p1-16.el7</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#ELSA-2019-2197">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2197</strong></div>
+                        <div>Low</div>
+                        <div>elfutils-libs:0.172-2.el7</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#ELSA-2019-2197">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2197</strong></div>
+                        <div>Low</div>
+                        <div>elfutils-default-yama-scope:0.172-2.el7</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#ELSA-2019-2143">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2143</strong></div>
+                        <div>Low</div>
+                        <div>openssh-clients:7.4p1-16.el7</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#ELSA-2019-2181">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2181</strong></div>
+                        <div>Low</div>
+                        <div>libcurl:7.29.0-51.0.1.el7_6.3</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#ELSA-2019-2197">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2197</strong></div>
+                        <div>Low</div>
+                        <div>elfutils-libelf:0.172-2.el7</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#ELSA-2019-2181">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2181</strong></div>
+                        <div>Low</div>
+                        <div>curl:7.29.0-51.0.1.el7_6.3</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#ELSA-2019-2143">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2143</strong></div>
+                        <div>Low</div>
+                        <div>openssh-server:7.4p1-16.el7</div>
+                    </div>
+                </a>
+                
+                
+                
+                <a class="node Medium" href="#ELSA-2019-2136">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2136</strong></div>
+                        <div>Medium</div>
+                        <div>libssh2:1.4.3-12.0.1.el7_6.3</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2189">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2189</strong></div>
+                        <div>Medium</div>
+                        <div>procps-ng:3.3.10-23.el7</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2237">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2237</strong></div>
+                        <div>Medium</div>
+                        <div>nss-util:3.36.0-1.1.el7_6</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2237">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2237</strong></div>
+                        <div>Medium</div>
+                        <div>nss-softokn:3.36.0-5.0.1.el7_5</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2030">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2030</strong></div>
+                        <div>Medium</div>
+                        <div>python:2.7.5-80.0.1.el7_6</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2091">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2091</strong></div>
+                        <div>Medium</div>
+                        <div>libgudev1:219-62.0.4.el7_6.9</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2237">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2237</strong></div>
+                        <div>Medium</div>
+                        <div>nss-tools:3.36.0-7.1.el7_6</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2091">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2091</strong></div>
+                        <div>Medium</div>
+                        <div>systemd:219-62.0.4.el7_6.9</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2237">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2237</strong></div>
+                        <div>Medium</div>
+                        <div>nss-softokn-freebl:3.36.0-5.0.1.el7_5</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2060">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2060</strong></div>
+                        <div>Medium</div>
+                        <div>dhclient:12:4.2.5-68.0.1.el7_5.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2118">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2118</strong></div>
+                        <div>Medium</div>
+                        <div>glibc:2.17-260.0.17.el7_6.6</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2060">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2060</strong></div>
+                        <div>Medium</div>
+                        <div>dhcp-common:12:4.2.5-68.0.1.el7_5.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2110">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2110</strong></div>
+                        <div>Medium</div>
+                        <div>rsyslog:8.24.0-34.el7</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2057">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2057</strong></div>
+                        <div>Medium</div>
+                        <div>bind-license:32:9.9.4-74.el7_6.2</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2237">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2237</strong></div>
+                        <div>Medium</div>
+                        <div>nspr:4.19.0-1.el7_5</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2091">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2091</strong></div>
+                        <div>Medium</div>
+                        <div>systemd-libs:219-62.0.4.el7_6.9</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2118">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2118</strong></div>
+                        <div>Medium</div>
+                        <div>glibc-common:2.17-260.0.17.el7_6.6</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2030">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2030</strong></div>
+                        <div>Medium</div>
+                        <div>python-libs:2.7.5-80.0.1.el7_6</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2237">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2237</strong></div>
+                        <div>Medium</div>
+                        <div>nss-sysinit:3.36.0-7.1.el7_6</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2060">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2060</strong></div>
+                        <div>Medium</div>
+                        <div>dhcp-libs:12:4.2.5-68.0.1.el7_5.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2237">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2237</strong></div>
+                        <div>Medium</div>
+                        <div>nss:3.36.0-7.1.el7_6</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2075">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2075</strong></div>
+                        <div>Medium</div>
+                        <div>binutils:2.27-34.base.0.1.el7</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2304">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2304</strong></div>
+                        <div>Medium</div>
+                        <div>openssl-libs:1:1.0.2k-16.0.1.el7_6.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#ELSA-2019-2057">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>ELSA-2019-2057</strong></div>
+                        <div>Medium</div>
+                        <div>bind-libs-lite:32:9.9.4-74.el7_6.2</div>
+                    </div>
+                </a>
+                
+                
+            </div>
+        </div>
+
+        <section class="report">
+            <div>
+                <div class="panel">
+                    <div class="layers">
+                        <div id="005a73462d339a624ada50e5a066ab05ce6e1e181395eb9824217ca047831e6e" class="layer">
+                            <h3 class="layer__title" data-toggle-layer="005a73462d339a624ada50e5a066ab05ce6e1e181395eb9824217ca047831e6e">005a73462d339a624ada50e5a066ab05ce6e1e181395eb9824217ca047831e6e</h3>
+                            <div class="features">
+                                <ul>
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libssh2</strong> <span>1.4.3-12.0.1.el7_6.3</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2136"></a>
+                                                <strong class="name">ELSA-2019-2136</strong>
+                                                <div> [1.8.0-3] - sanitize public header file (detected by rpmdiff) [1.8.0-2] - fix integer overflow in keyboard interactive handling that allows out-of-bounds writes (CVE-2019-3863) - fix out-of-bounds memory comparison with specially crafted message channel request (CVE-2019-3862) - fix out-of-bounds reads with specially crafted SSH packets (CVE-2019-3861) - fix zero-byte allocation in SFTP packet processing resulting in out-of-bounds read (CVE-2019-3858) - fix integer overflow in SSH packet processing channel resulting in out of bounds write (CVE-2019-3857) - fix integer overflow in keyboard interactive handling resulting in out of bounds write (CVE-2019-3856) - fix integer overflow in transport read resulting in out of bounds write (CVE-2019-3855) [1.8.0-1] - rebase to 1.8.0 (#1592784) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2136.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>procps-ng</strong> <span>3.3.10-23.el7</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2189"></a>
+                                                <strong class="name">ELSA-2019-2189</strong>
+                                                <div> [3.3.10-26] - free: unreclaimable slabs counted into free memory, used mem incorrect - Resolves: rhbz#1699264 [3.3.10-25] - ps: recognize SCHED_DEADLINE in CLS field, upstream backport - Resolves: rhbz#1692843 [3.3.10-24] - top: Do not default to the cwd in configs_read() - Resolves: rhbz#1577023 </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2189.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>nss-util</strong> <span>3.36.0-1.1.el7_6</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2237"></a>
+                                                <strong class="name">ELSA-2019-2237</strong>
+                                                <div> nspr [4.21.0-1] - Rebase to NSPR 4.21 nss [3.44.0-4] - Fix certutil man page - Fix extracting a public key from a private key for dh, ec, and dsa [3.44.0-3] - Disable TLS 1.3 under FIPS mode - Disable RSASSA-PKCS1-v1_5 in TLS 1.3 - Fix post-handshake auth transcript calculation if   SSL_ENABLE_SESSION_TICKETS is set [3.44.0-2] - Skip sysinit gtests properly - Fix shell syntax error in tests/ssl/ssl.sh - Regenerate manual pages [3.44.0-1] - Rebase to NSS 3.44 - Restore fix-min-library-version-in-SSLVersionRange.patch to keep   SSL3 supported in the code level while it is disabled by policy - Skip TLS 1.3 tests under FIPS mode [3.43.0-9] - Ignore system policy when running %check [3.43.0-8] - Fix policy string [3.43.0-7] - Dont override date in man-pages - Revert the change to use XDG basedirs (mozilla#818686) - Enable SSL2 compatible ClientHello by default - Disable SSL3 and RC4 by default [3.43.0-6] - Make '-V ssl3:' option work with tools [3.43.0-5] - Fix regression in MD5 disablement [3.43.0-4] - add certutil documentation [3.43.0-3] - Restore complete removal of SSLv2 - Disable SSLv3 - Move signtool to unsupported directory [3.43.0-2] - Expand IPSEC usage to include ssl and email certs. Remove special   processing of the usage based on the critical flag [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-8.1] - move key on unwrap failure and retry. [3.36.0-8] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 nss-softokn [3.44.0-5.0.1] - Add fips140-2 DSA Known Answer Test fix [Orabug: 26679337] - Add fips140-2 ECDSA/RSA/DSA Pairwise Consistency Test fix [Orabug: 26617814],   [Orabug: 26617879], [Orabug: 26617849] [3.44.0-5] - Add pub from priv mechanism [3.44.0-4] - Add ike mechanisms - FIPS update [3.44.0-3] - Remove stray 'exit' in %prep [3.44.0-2] - Fix nss-softokn-fs-probe.patch to detect threshold correctly [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-5] - Restore nss-softokn-fs-probe.patch [3.43.0-4] - Enable iquote.patch [3.43.0-2] - Rebuild nss-util [3.44.0-3] - Add pub from priv mechanism - ike mechanisms should not overlap with JPAKE [3.44.0-2] - Add ike mechanisms [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-2] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2237.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>nss-softokn</strong> <span>3.36.0-5.0.1.el7_5</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2237"></a>
+                                                <strong class="name">ELSA-2019-2237</strong>
+                                                <div> nspr [4.21.0-1] - Rebase to NSPR 4.21 nss [3.44.0-4] - Fix certutil man page - Fix extracting a public key from a private key for dh, ec, and dsa [3.44.0-3] - Disable TLS 1.3 under FIPS mode - Disable RSASSA-PKCS1-v1_5 in TLS 1.3 - Fix post-handshake auth transcript calculation if   SSL_ENABLE_SESSION_TICKETS is set [3.44.0-2] - Skip sysinit gtests properly - Fix shell syntax error in tests/ssl/ssl.sh - Regenerate manual pages [3.44.0-1] - Rebase to NSS 3.44 - Restore fix-min-library-version-in-SSLVersionRange.patch to keep   SSL3 supported in the code level while it is disabled by policy - Skip TLS 1.3 tests under FIPS mode [3.43.0-9] - Ignore system policy when running %check [3.43.0-8] - Fix policy string [3.43.0-7] - Dont override date in man-pages - Revert the change to use XDG basedirs (mozilla#818686) - Enable SSL2 compatible ClientHello by default - Disable SSL3 and RC4 by default [3.43.0-6] - Make '-V ssl3:' option work with tools [3.43.0-5] - Fix regression in MD5 disablement [3.43.0-4] - add certutil documentation [3.43.0-3] - Restore complete removal of SSLv2 - Disable SSLv3 - Move signtool to unsupported directory [3.43.0-2] - Expand IPSEC usage to include ssl and email certs. Remove special   processing of the usage based on the critical flag [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-8.1] - move key on unwrap failure and retry. [3.36.0-8] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 nss-softokn [3.44.0-5.0.1] - Add fips140-2 DSA Known Answer Test fix [Orabug: 26679337] - Add fips140-2 ECDSA/RSA/DSA Pairwise Consistency Test fix [Orabug: 26617814],   [Orabug: 26617879], [Orabug: 26617849] [3.44.0-5] - Add pub from priv mechanism [3.44.0-4] - Add ike mechanisms - FIPS update [3.44.0-3] - Remove stray 'exit' in %prep [3.44.0-2] - Fix nss-softokn-fs-probe.patch to detect threshold correctly [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-5] - Restore nss-softokn-fs-probe.patch [3.43.0-4] - Enable iquote.patch [3.43.0-2] - Rebuild nss-util [3.44.0-3] - Add pub from priv mechanism - ike mechanisms should not overlap with JPAKE [3.44.0-2] - Add ike mechanisms [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-2] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2237.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>openssh</strong> <span>7.4p1-16.el7</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="ELSA-2019-2143"></a>
+                                                <strong class="name">ELSA-2019-2143</strong>
+                                                <div> [7.4p1-21 + 0.10.3-2] - Avoid double comma in the default cipher list in FIPS mode (#1722446) [7.4p1-20 + 0.10.3-2] - Revert the updating of cached passwd structure (#1712053) [7.4p1-19 + 0.10.3-2] - Update cached passwd structure after PAM authentication (#1674541) [7.4p1-18 + 0.10.3-2] - invalidate supplemental group cache used by temporarily_use_uid()   when the target uid differs (#1583735) [7.4p1-17 + 0.10.3-2] - Fix for CVE-2018-15473 (#1619079) - Enable GCM mode for AES ciphers in FIPS mode (#1600869) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2143.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>elfutils-libs</strong> <span>0.172-2.el7</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="ELSA-2019-2197"></a>
+                                                <strong class="name">ELSA-2019-2197</strong>
+                                                <div> [0.176-2] - Add elfutils-0.176-xlate-note.patch (#1704754) [0.176-1] - New upstream release (#1676504)   CVE-2019-7146, CVE-2019-7148, CVE-2019-7149, CVE-2019-7150,   CVE-2019-7664, CVE-2019-7665, CVE-2018-16062, CVE-2018-16402,   CVE-2018-16403, CVE-2018-18310, CVE-2018-18521, CVE-2018-18520. </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2197.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>python</strong> <span>2.7.5-80.0.1.el7_6</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2030"></a>
+                                                <strong class="name">ELSA-2019-2030</strong>
+                                                <div> [2.7.5-86.0.1] - Add Oracle Linux distribution in platform.py [orabug 20812544] [2.7.5-86] - Security fix for CVE-2019-10160 Resolves: rhbz#1718388 [2.7.5-85] - Security fix for CVE-2019-9948 Resolves: rhbz#1704174 [2.7.5-84] - Disallow control chars in http URLs - Fixes CVE-2019-9740 and CVE-2019-9947 Resolves: rhbz#1704362 and rhbz#1703530 [2.7.5-83] - Remove unversioned obsoletes Resolves: rhbz#1703600 [2.7.5-82] - Updated fix for CVE-2019-9636 Resolves: rhbz#1689317 [2.7.5-81] - Security fix for CVE-2019-9636 Resolves: rhbz#1689317 </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2030.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libgudev1</strong> <span>219-62.0.4.el7_6.9</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2091"></a>
+                                                <strong class="name">ELSA-2019-2091</strong>
+                                                <div> [219-67.0.1] - do not create utmp update symlinks for reboot and poweroff [Orabug: 27854896] - OL7 udev rule for virtio net standby interface [Orabug: 28826743] - fix _netdev is missing for iscsi entry in /etc/fstab [Orabug: 25897792] (tony.l.lam@oracle.com) - set 'RemoveIPC=no' in logind.conf as default for OL7.2 [22224874] - allow dm remove ioctl to co-operate with UEK3 (Vaughan Cao) [Orabug: 18467469] - add hv dynamic memory support (Jerry Snitselaar) [Orabug: 18621475] [219-67] - fix mis-merge (#1714503) - fs-util: chase_symlinks(): prevent double fre (#1714782) [219-66] - sd-bus: unify three code-paths which free struct bus_container (#1643394) - hashmap: dont use mempool (#1609349) - man: be more explicit about thread safety of sd_journal (#1609349) - selinux: dont log SELINUX_INFO and SELINUX_WARNING messages to audit (#1240730) [219-65] - backport fd_is_fs_type (#1663143) - backport chase_symlinks (#1663143) - fs-util: add new CHASE_SAFE flag to chase_symlinks() (#1663143) - fs-util: add new chase_symlinks() flag CHASE_OPEN (#1663143) - sd-dameon: also sent ucred when our UID differs from EUID (#1663143) - notify: add new --uid= command (#1663143) - core: be stricter when handling PID files and MAINPID sd_notify() messages (#1663143) - journald: respect KeepFree= as well as MaxUse= values (#1361893) - shutdown: in_container was used before its definition (#1693716) - core: Fix edge case when processing /proc/self/mountinfo (#1691511) - sd-bus: deal with cookie overruns (#1693559) - Refuse dbus message paths longer than BUS_PATH_SIZE_MAX limit. (#1667871) - Allocate temporary strings to hold dbus paths on the heap (#1667871) - sd-bus: if we receive an invalid dbus message, ignore and proceeed (#1667871) - udev: check if the spawned PID didnt exit after reaping unexpected PID (#1697909) - udev: call poll() again after killing the spawned process (#1697909) - udev: check age against both timeouts to prevent integer wraparound (#1697909) - avoid possible hang if our child process hangs (#1697909) - missing: when adding syscall replacements, use different names (#1694605) - include sys/sysmacros.h in more places (#1694605) [219-64] - detect-virt: do not try to read all of /proc/cpuinfo (#1631531) - core: disable the effect of Restart= if theres a stop job pending for a service (#6581) (#1626382) - networkd: respect DHCP UseRoutes option (#1663365) - networkd: fix dhcp4 link without routes not being considered ready (#8728) (#1663365) - networkd: dont crash when mtu changes (#6594) (#1663365) - tmpfiles: 'e' takes globs (#1641764) - tmpfiles: 'e' is supposed to operate on directory only (#1641764) - tmpfiles: 'e' is supposed to accept shell-style globs (#1641764) - bus-message: do not crash on message with a string of zero length (#1643396) - Revert 'bus: when dumping string property values escape the chars we use as end-of-line and end-of-item marks' (#1643172) - set automount state to waiting when the mount is stopped (#1651257) - core: when deserializing state always use read_line(, LONG_LINE_MAX, ) (CVE-2018-15686) - shorten hostname before checking for trailing dot (#1631625) - journald: fixed assertion failure when system journal rotation fails (#9893) (#1619543) - local-addresses: handle gracefully if routes lack an RTA_OIF attribute (#1627750) - rules: fix memory hotplug rule so systemd-detect-virt does not run too often (#1666612) - 6647 - use path_startswith('/dev') in cryptsetup (#6732) (#1664695) - core: mount-setup: handle non-existing mountpoints gracefully (#1585411) - units/rescue.service.in: fix announcement message (#1660422) - systemctl: Allow 'edit' and 'cat' on unloaded units (#1649518) - main: improve RLIMIT_NOFILE handling (#5795) (#1585913) - shared/sleep-config: exclude zram devices from hibernation candidates (#1609816) - journalctl: allow --file/--directory with --boot or --list-boots (#1463678) - journalct: allow --boot=0 to DTRT with --file/--directory (#1463678) - journal-remote: show error message if output file name does not end with .journal (bz#1267552) - artificially serialize building of .policy files (#1272485) - cryptsetup: add support for sector-size= option (#9936) (#1571801) - cryptsetup: do not define arg_sector_size if libgcrypt is v1.x (#9990) (#1571801) - journal: fix syslog_parse_identifier() (#1657794) - journal: do not remove multiple spaces after identifier in syslog message (#1657794) - tmpfiles: change ownership of symlinks too (#1620110) - tmpfiles: fix check for figuring out whether to call chmod() (#1620110) - shared/install: allow 'enable' on linked unit files (#1628575) [219-63] - dhcp6: make sure we have enough space for the DHCP6 option header (CVE-2018-15688) - journald: do not store the iovec entry for process commandline on stack (#1657788) - journald: set a limit on the number of fields (1k) (#1657792) - journal-remote: set a limit on the number of fields in a message (#1657792) - journald: free cmdline buffers owned by iovec (#1666646) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2091.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>nss-tools</strong> <span>3.36.0-7.1.el7_6</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2237"></a>
+                                                <strong class="name">ELSA-2019-2237</strong>
+                                                <div> nspr [4.21.0-1] - Rebase to NSPR 4.21 nss [3.44.0-4] - Fix certutil man page - Fix extracting a public key from a private key for dh, ec, and dsa [3.44.0-3] - Disable TLS 1.3 under FIPS mode - Disable RSASSA-PKCS1-v1_5 in TLS 1.3 - Fix post-handshake auth transcript calculation if   SSL_ENABLE_SESSION_TICKETS is set [3.44.0-2] - Skip sysinit gtests properly - Fix shell syntax error in tests/ssl/ssl.sh - Regenerate manual pages [3.44.0-1] - Rebase to NSS 3.44 - Restore fix-min-library-version-in-SSLVersionRange.patch to keep   SSL3 supported in the code level while it is disabled by policy - Skip TLS 1.3 tests under FIPS mode [3.43.0-9] - Ignore system policy when running %check [3.43.0-8] - Fix policy string [3.43.0-7] - Dont override date in man-pages - Revert the change to use XDG basedirs (mozilla#818686) - Enable SSL2 compatible ClientHello by default - Disable SSL3 and RC4 by default [3.43.0-6] - Make '-V ssl3:' option work with tools [3.43.0-5] - Fix regression in MD5 disablement [3.43.0-4] - add certutil documentation [3.43.0-3] - Restore complete removal of SSLv2 - Disable SSLv3 - Move signtool to unsupported directory [3.43.0-2] - Expand IPSEC usage to include ssl and email certs. Remove special   processing of the usage based on the critical flag [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-8.1] - move key on unwrap failure and retry. [3.36.0-8] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 nss-softokn [3.44.0-5.0.1] - Add fips140-2 DSA Known Answer Test fix [Orabug: 26679337] - Add fips140-2 ECDSA/RSA/DSA Pairwise Consistency Test fix [Orabug: 26617814],   [Orabug: 26617879], [Orabug: 26617849] [3.44.0-5] - Add pub from priv mechanism [3.44.0-4] - Add ike mechanisms - FIPS update [3.44.0-3] - Remove stray 'exit' in %prep [3.44.0-2] - Fix nss-softokn-fs-probe.patch to detect threshold correctly [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-5] - Restore nss-softokn-fs-probe.patch [3.43.0-4] - Enable iquote.patch [3.43.0-2] - Rebuild nss-util [3.44.0-3] - Add pub from priv mechanism - ike mechanisms should not overlap with JPAKE [3.44.0-2] - Add ike mechanisms [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-2] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2237.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>systemd</strong> <span>219-62.0.4.el7_6.9</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2091"></a>
+                                                <strong class="name">ELSA-2019-2091</strong>
+                                                <div> [219-67.0.1] - do not create utmp update symlinks for reboot and poweroff [Orabug: 27854896] - OL7 udev rule for virtio net standby interface [Orabug: 28826743] - fix _netdev is missing for iscsi entry in /etc/fstab [Orabug: 25897792] (tony.l.lam@oracle.com) - set 'RemoveIPC=no' in logind.conf as default for OL7.2 [22224874] - allow dm remove ioctl to co-operate with UEK3 (Vaughan Cao) [Orabug: 18467469] - add hv dynamic memory support (Jerry Snitselaar) [Orabug: 18621475] [219-67] - fix mis-merge (#1714503) - fs-util: chase_symlinks(): prevent double fre (#1714782) [219-66] - sd-bus: unify three code-paths which free struct bus_container (#1643394) - hashmap: dont use mempool (#1609349) - man: be more explicit about thread safety of sd_journal (#1609349) - selinux: dont log SELINUX_INFO and SELINUX_WARNING messages to audit (#1240730) [219-65] - backport fd_is_fs_type (#1663143) - backport chase_symlinks (#1663143) - fs-util: add new CHASE_SAFE flag to chase_symlinks() (#1663143) - fs-util: add new chase_symlinks() flag CHASE_OPEN (#1663143) - sd-dameon: also sent ucred when our UID differs from EUID (#1663143) - notify: add new --uid= command (#1663143) - core: be stricter when handling PID files and MAINPID sd_notify() messages (#1663143) - journald: respect KeepFree= as well as MaxUse= values (#1361893) - shutdown: in_container was used before its definition (#1693716) - core: Fix edge case when processing /proc/self/mountinfo (#1691511) - sd-bus: deal with cookie overruns (#1693559) - Refuse dbus message paths longer than BUS_PATH_SIZE_MAX limit. (#1667871) - Allocate temporary strings to hold dbus paths on the heap (#1667871) - sd-bus: if we receive an invalid dbus message, ignore and proceeed (#1667871) - udev: check if the spawned PID didnt exit after reaping unexpected PID (#1697909) - udev: call poll() again after killing the spawned process (#1697909) - udev: check age against both timeouts to prevent integer wraparound (#1697909) - avoid possible hang if our child process hangs (#1697909) - missing: when adding syscall replacements, use different names (#1694605) - include sys/sysmacros.h in more places (#1694605) [219-64] - detect-virt: do not try to read all of /proc/cpuinfo (#1631531) - core: disable the effect of Restart= if theres a stop job pending for a service (#6581) (#1626382) - networkd: respect DHCP UseRoutes option (#1663365) - networkd: fix dhcp4 link without routes not being considered ready (#8728) (#1663365) - networkd: dont crash when mtu changes (#6594) (#1663365) - tmpfiles: 'e' takes globs (#1641764) - tmpfiles: 'e' is supposed to operate on directory only (#1641764) - tmpfiles: 'e' is supposed to accept shell-style globs (#1641764) - bus-message: do not crash on message with a string of zero length (#1643396) - Revert 'bus: when dumping string property values escape the chars we use as end-of-line and end-of-item marks' (#1643172) - set automount state to waiting when the mount is stopped (#1651257) - core: when deserializing state always use read_line(, LONG_LINE_MAX, ) (CVE-2018-15686) - shorten hostname before checking for trailing dot (#1631625) - journald: fixed assertion failure when system journal rotation fails (#9893) (#1619543) - local-addresses: handle gracefully if routes lack an RTA_OIF attribute (#1627750) - rules: fix memory hotplug rule so systemd-detect-virt does not run too often (#1666612) - 6647 - use path_startswith('/dev') in cryptsetup (#6732) (#1664695) - core: mount-setup: handle non-existing mountpoints gracefully (#1585411) - units/rescue.service.in: fix announcement message (#1660422) - systemctl: Allow 'edit' and 'cat' on unloaded units (#1649518) - main: improve RLIMIT_NOFILE handling (#5795) (#1585913) - shared/sleep-config: exclude zram devices from hibernation candidates (#1609816) - journalctl: allow --file/--directory with --boot or --list-boots (#1463678) - journalct: allow --boot=0 to DTRT with --file/--directory (#1463678) - journal-remote: show error message if output file name does not end with .journal (bz#1267552) - artificially serialize building of .policy files (#1272485) - cryptsetup: add support for sector-size= option (#9936) (#1571801) - cryptsetup: do not define arg_sector_size if libgcrypt is v1.x (#9990) (#1571801) - journal: fix syslog_parse_identifier() (#1657794) - journal: do not remove multiple spaces after identifier in syslog message (#1657794) - tmpfiles: change ownership of symlinks too (#1620110) - tmpfiles: fix check for figuring out whether to call chmod() (#1620110) - shared/install: allow 'enable' on linked unit files (#1628575) [219-63] - dhcp6: make sure we have enough space for the DHCP6 option header (CVE-2018-15688) - journald: do not store the iovec entry for process commandline on stack (#1657788) - journald: set a limit on the number of fields (1k) (#1657792) - journal-remote: set a limit on the number of fields in a message (#1657792) - journald: free cmdline buffers owned by iovec (#1666646) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2091.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>nss-softokn-freebl</strong> <span>3.36.0-5.0.1.el7_5</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2237"></a>
+                                                <strong class="name">ELSA-2019-2237</strong>
+                                                <div> nspr [4.21.0-1] - Rebase to NSPR 4.21 nss [3.44.0-4] - Fix certutil man page - Fix extracting a public key from a private key for dh, ec, and dsa [3.44.0-3] - Disable TLS 1.3 under FIPS mode - Disable RSASSA-PKCS1-v1_5 in TLS 1.3 - Fix post-handshake auth transcript calculation if   SSL_ENABLE_SESSION_TICKETS is set [3.44.0-2] - Skip sysinit gtests properly - Fix shell syntax error in tests/ssl/ssl.sh - Regenerate manual pages [3.44.0-1] - Rebase to NSS 3.44 - Restore fix-min-library-version-in-SSLVersionRange.patch to keep   SSL3 supported in the code level while it is disabled by policy - Skip TLS 1.3 tests under FIPS mode [3.43.0-9] - Ignore system policy when running %check [3.43.0-8] - Fix policy string [3.43.0-7] - Dont override date in man-pages - Revert the change to use XDG basedirs (mozilla#818686) - Enable SSL2 compatible ClientHello by default - Disable SSL3 and RC4 by default [3.43.0-6] - Make '-V ssl3:' option work with tools [3.43.0-5] - Fix regression in MD5 disablement [3.43.0-4] - add certutil documentation [3.43.0-3] - Restore complete removal of SSLv2 - Disable SSLv3 - Move signtool to unsupported directory [3.43.0-2] - Expand IPSEC usage to include ssl and email certs. Remove special   processing of the usage based on the critical flag [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-8.1] - move key on unwrap failure and retry. [3.36.0-8] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 nss-softokn [3.44.0-5.0.1] - Add fips140-2 DSA Known Answer Test fix [Orabug: 26679337] - Add fips140-2 ECDSA/RSA/DSA Pairwise Consistency Test fix [Orabug: 26617814],   [Orabug: 26617879], [Orabug: 26617849] [3.44.0-5] - Add pub from priv mechanism [3.44.0-4] - Add ike mechanisms - FIPS update [3.44.0-3] - Remove stray 'exit' in %prep [3.44.0-2] - Fix nss-softokn-fs-probe.patch to detect threshold correctly [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-5] - Restore nss-softokn-fs-probe.patch [3.43.0-4] - Enable iquote.patch [3.43.0-2] - Rebuild nss-util [3.44.0-3] - Add pub from priv mechanism - ike mechanisms should not overlap with JPAKE [3.44.0-2] - Add ike mechanisms [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-2] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2237.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dhclient</strong> <span>12:4.2.5-68.0.1.el7_5.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2060"></a>
+                                                <strong class="name">ELSA-2019-2060</strong>
+                                                <div> [12:4.2.5-77.0.1] - Direct users to Oracle Linux support site. [12:4.2.5-77] - Resolves: #1712414 - Reset signal handlers set by isclib [12:4.2.5-76] - Resolves: #1704675 - Fix crash of dhcpd(6) triggered by bind rebase [12:4.2.5-75] - Resolves: #1672308 - Do not restart dhcp on NetworkManagers up events [12:4.2.5-74] - Use bind-export-libs package instead of bind99 - Use isc-config.sh to configure bind libs - Change requirement to bind-export-devel - Compile with recent bind includes, that does not include isc/util.h [12:4.2.5-73] - Resolves: #1635181 - Change default ipv6 prefix to /128. - Allow its customization via cl option [12:4.2.5-72] - Resolves: #1647784 - Update renew time if it is greater than expiry [12:4.2.5-71] - Resolves: #1623792 - Load leases file in tracing mode only [12:4.2.5-70] - Resolves: #1574292 - Fix options conflict for ddns update [12:4.2.5-69] - Resolves: #1570895 - Fix command execution vulnerability (CVE-2018-1111) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2060.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>elfutils-default-yama-scope</strong> <span>0.172-2.el7</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="ELSA-2019-2197"></a>
+                                                <strong class="name">ELSA-2019-2197</strong>
+                                                <div> [0.176-2] - Add elfutils-0.176-xlate-note.patch (#1704754) [0.176-1] - New upstream release (#1676504)   CVE-2019-7146, CVE-2019-7148, CVE-2019-7149, CVE-2019-7150,   CVE-2019-7664, CVE-2019-7665, CVE-2018-16062, CVE-2018-16402,   CVE-2018-16403, CVE-2018-18310, CVE-2018-18521, CVE-2018-18520. </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2197.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>glibc</strong> <span>2.17-260.0.17.el7_6.6</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2118"></a>
+                                                <strong class="name">ELSA-2019-2118</strong>
+                                                <div> [2.17-292.0.1.7] - Remove glibc-ora28641867.patch as duplicate of glibc-rh1705899-4.patch - Make _IO_funlockfile match __funlockfile and _IO_flockfile match __flockfile   Both should test     if ((stream->_flags & _IO_USER_LOCK) == 0)       _IO_lock_lock (*stream->_lock);   OraBug 28481550.   Reviewed-by: Jose E. Marchesi <jose.marchesi@oracle.com> - Modify glibc-ora28849085.patch so it works with RHCK kernels.   Orabug 28849085. - Reviewed-by: Egeyar Bagcioglu <egeyar.bagcioglu@oracle.com> - Use NLM_F_SKIP_STATS in uek2 and RTEXT_FILTER_SKIP_STATS in uek4 in getifaddrs. - Orabug 28849085 - Reviewed-by: Patrick McGehearty <patrick.mcgehearty@oracle.com> - Mention CVE numbers in the .spec file for CVE-2015-8983 and CVE-2015-8984. - Orabug 25558067. - Reviewed-by: Egeyar Bagcioglu <egeyar.bagcioglu@oracle.com> - Regenerate plural.c - OraBug 28806294. - Reviewed-by: Jose E. Marchesi <jose.marchesi@oracle.com> - intl: Port to Bison 3.0 - Backport of upstream gettext commit 19f23e290a5e4a82b9edf9f5a4f8ab6192871be9 - OraBug 28806294. - Reviewed-by: Patrick McGehearty <patrick.mcgehearty@oracle.com> - Fix dbl-64/wordsize-64 remquo (bug 17569). - Backport of upstream d9afe48d55a412e76b0dcb28335fd4b390fe07ae - OraBug 19570749. - Reviewed-by: Jose E. Marchesi <jose.marchesi@oracle.com> - libio: Disable vtable validation in case of interposition. - Backport of upstream c402355dfa7807b8e0adb27c009135a7e2b9f1b0. - OraBug 28641867. - Reviewed-by: Egeyar Bagcioglu <egeyar.bagcioglu@oracle.com> - Include-linux-falloc.h-in-bits-fcntl-linux.h - Defines FALLOC_FL_PUNSH_HOLE, FALLOC_FL_KEEP_SIZE,   FALLOC_FL_COLLAPSE_RANGE, and FALLOC_FL_ZERO_RANGE - OraBug 28483336 - Add MAP_SHARED_VALIDATE and MAP_SYNC flags to - sysdeps/unix/sysv/linux/x86/bits/mman.h - OraBug 28389572 - Update bits/siginfo.h with Linux hwpoison SIGBUS changes. - Adds new SIGBUS error codes for hardware poison signals, syncing with   the current kernel headers (v3.9). - It also adds si_trapno field for alpha. - New values: BUS_MCEERR_AR, BUS_MCEERR_AO - OraBug 28124569 [2.17-292] - Avoid iconv hang on invalid multi-byte sequences (#1427734) [2.17-291] - Use versioned Obsoletes: for nss_db (#1703565) [2.17-290] - Adjust to find-debuginfo.sh changes (#1661508) [2.17-289] - ja_JP: Add new Japanese Era name (#1555189) [2.17-288] - Unify and improve pthread_once implementation for all architectures (#1163509) [2.17.287] - malloc: Always call memcpy in _int_realloc (#1662842) [2.17-286] - Update comments in nscd.conf and nsswitch.conf (#1488370) [2.17-285] - intl: Ensure plural.c is current to prevent regenerating it (#1640764) [2.17-284] - Update <netinet/in.h> to include IP*_PMTUDISC_OMIT and others (#1684874) [2.17-283] - elf: Adjust the big PT_NOTE test to exercise the bug in more cases (#1579739) [2.17-282] - x86: Fix incorrect selection of string functions (#1641981) [2.17-281] - elf: Avoid stack overflow with large PT_NOTE segments (#1579739) [2.17-280] - resolv: Fully initialize sendmmsg argument data (#1579354) [2.17-279] - Improve formatting of Netlink error messages (#1443872) [2.17-278] - Run resolv/tst-inet_aton_exact test (#1673465) [2.17-277] - getifaddrs could return interfaces with ifa_name set to NULL (#1472832) [2.17-276] - Terminate process on invalid netlink response from kernel (#1443872) [2.17-275] - resolv: Support host names with trailing dashes (#1039304) [2.17-274] - CVE-2016-10739: Reject trailing characters in getaddrinfo (#1673465) [2.17-273] - Update syscall list for Linux 4.20 (#1657015) [2.17-272] - glibc-headers: Add ipc STAT_ANY constants (#1592475) [2.17-271] - localedata: Make IBM273 compatible with ISO-8859-1 (#1591268) [2.17-270] - Fix pldd race condition that may leave the process stopped after   detaching. (#1609067) [2.17-269] - libanl: properly cleanup if first helper thread creation failed (#1646373) [2.17-268] - Add note about missing test case for BZ1457479 (#1635325) [2.17-267] - elf: Fix data race in _dl_profile_fixup (#1630440) [2.17-266] - Fix i386 sigaction sa_restorer initialization (#1579730) [2.17-265] - Fix compilation error in stdlib/tst-strtod-overflow.c (#1647490) [2.17-264] - aarch64: Disable lazy symbol binding of TLSDESC (#1639524) [2.17-263] - Reduce RAM requirements for stdlib/test-bz22786 (#1647490) [2.17-262] - libio vtable validation improvements (#1595191) [2.17-261] - Update support/ to the most recent upstream version (#1595191) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2118.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dhcp-common</strong> <span>12:4.2.5-68.0.1.el7_5.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2060"></a>
+                                                <strong class="name">ELSA-2019-2060</strong>
+                                                <div> [12:4.2.5-77.0.1] - Direct users to Oracle Linux support site. [12:4.2.5-77] - Resolves: #1712414 - Reset signal handlers set by isclib [12:4.2.5-76] - Resolves: #1704675 - Fix crash of dhcpd(6) triggered by bind rebase [12:4.2.5-75] - Resolves: #1672308 - Do not restart dhcp on NetworkManagers up events [12:4.2.5-74] - Use bind-export-libs package instead of bind99 - Use isc-config.sh to configure bind libs - Change requirement to bind-export-devel - Compile with recent bind includes, that does not include isc/util.h [12:4.2.5-73] - Resolves: #1635181 - Change default ipv6 prefix to /128. - Allow its customization via cl option [12:4.2.5-72] - Resolves: #1647784 - Update renew time if it is greater than expiry [12:4.2.5-71] - Resolves: #1623792 - Load leases file in tracing mode only [12:4.2.5-70] - Resolves: #1574292 - Fix options conflict for ddns update [12:4.2.5-69] - Resolves: #1570895 - Fix command execution vulnerability (CVE-2018-1111) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2060.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>rsyslog</strong> <span>8.24.0-34.el7</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2110"></a>
+                                                <strong class="name">ELSA-2019-2110</strong>
+                                                <div> [8.24.0-38] RHEL 7.7 ERRATUM - added patch increasing max path size preventing buffer overflow   with too long paths   resolves: rhbz#1656860 [8.24.0-37] RHEL 7.7 ERRATUM - edited patch fixing mmkubernetes halt after pod deletition   (covscan found an issue in previous version)   resolves: rhbz#1622767 - added patch stopping flooding logs with journald errors   resolves: rhbz#1632211 - added patch stopping flooding logs with symlink false-positives   resolves: rhbz#1685901 - added patch stopping memory leak when processing internal msgs   resolves: rhbz#1666365 - added documentation patch with info about CRI-O to mmkubernetes   resolves: rhbz#1625935 [8.24.0-36] RHEL 7.7 ERRATUM - added patch fixing mmkubernetes halt after pod deletition   resolves: rhbz#1622767 [8.24.0-35] RHEL 7.7 ERRATUM - added patch fixing memory corruption in omfwd module   resolves: rhbz#1632659 - added patch fixing imfile sopping monitor after rotation   resolves: rhbz#1649250 - added patch addressing imptcp CVE-2018-16881   resolves: rhbz#1658288 </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2110.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>bind-license</strong> <span>32:9.9.4-74.el7_6.2</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2057"></a>
+                                                <strong class="name">ELSA-2019-2057</strong>
+                                                <div> [32:9.11.4-9.P2] - Fix CVE-2019-6471 [32:9.11.4-8.P2] - Fix scriptlet errors when selinux-policy is not installed (#1647659) [32:9.11.4-7.P2] - Fix inefective limit of TCP clients (CVE-2018-5743) [32:9.11.4-6.P2] - Use /sbin/nologin again (#1676661) [32:9.11.4-5.P2] - Make sure selinux-policy is installed soon enough (#1647659) [32:9.11.4-4.P2] - Disable custom random generator for export libs (#1685940) [32:9.11.4-3.P2] - Fix memory handling in zone2ldap tool [32:9.11.4-2.P2] - Move dnssec utilities back to bind package - Remove separate python-bind package [32:9.11.4-1.P2] - Rebase features patches - Disable autodetected eddsa algorithm ED448 - Add versioned depends to all library subpackages - Fix multilib conflict of devel packages </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2057.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>nspr</strong> <span>4.19.0-1.el7_5</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2237"></a>
+                                                <strong class="name">ELSA-2019-2237</strong>
+                                                <div> nspr [4.21.0-1] - Rebase to NSPR 4.21 nss [3.44.0-4] - Fix certutil man page - Fix extracting a public key from a private key for dh, ec, and dsa [3.44.0-3] - Disable TLS 1.3 under FIPS mode - Disable RSASSA-PKCS1-v1_5 in TLS 1.3 - Fix post-handshake auth transcript calculation if   SSL_ENABLE_SESSION_TICKETS is set [3.44.0-2] - Skip sysinit gtests properly - Fix shell syntax error in tests/ssl/ssl.sh - Regenerate manual pages [3.44.0-1] - Rebase to NSS 3.44 - Restore fix-min-library-version-in-SSLVersionRange.patch to keep   SSL3 supported in the code level while it is disabled by policy - Skip TLS 1.3 tests under FIPS mode [3.43.0-9] - Ignore system policy when running %check [3.43.0-8] - Fix policy string [3.43.0-7] - Dont override date in man-pages - Revert the change to use XDG basedirs (mozilla#818686) - Enable SSL2 compatible ClientHello by default - Disable SSL3 and RC4 by default [3.43.0-6] - Make '-V ssl3:' option work with tools [3.43.0-5] - Fix regression in MD5 disablement [3.43.0-4] - add certutil documentation [3.43.0-3] - Restore complete removal of SSLv2 - Disable SSLv3 - Move signtool to unsupported directory [3.43.0-2] - Expand IPSEC usage to include ssl and email certs. Remove special   processing of the usage based on the critical flag [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-8.1] - move key on unwrap failure and retry. [3.36.0-8] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 nss-softokn [3.44.0-5.0.1] - Add fips140-2 DSA Known Answer Test fix [Orabug: 26679337] - Add fips140-2 ECDSA/RSA/DSA Pairwise Consistency Test fix [Orabug: 26617814],   [Orabug: 26617879], [Orabug: 26617849] [3.44.0-5] - Add pub from priv mechanism [3.44.0-4] - Add ike mechanisms - FIPS update [3.44.0-3] - Remove stray 'exit' in %prep [3.44.0-2] - Fix nss-softokn-fs-probe.patch to detect threshold correctly [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-5] - Restore nss-softokn-fs-probe.patch [3.43.0-4] - Enable iquote.patch [3.43.0-2] - Rebuild nss-util [3.44.0-3] - Add pub from priv mechanism - ike mechanisms should not overlap with JPAKE [3.44.0-2] - Add ike mechanisms [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-2] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2237.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>openssh-clients</strong> <span>7.4p1-16.el7</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="ELSA-2019-2143"></a>
+                                                <strong class="name">ELSA-2019-2143</strong>
+                                                <div> [7.4p1-21 + 0.10.3-2] - Avoid double comma in the default cipher list in FIPS mode (#1722446) [7.4p1-20 + 0.10.3-2] - Revert the updating of cached passwd structure (#1712053) [7.4p1-19 + 0.10.3-2] - Update cached passwd structure after PAM authentication (#1674541) [7.4p1-18 + 0.10.3-2] - invalidate supplemental group cache used by temporarily_use_uid()   when the target uid differs (#1583735) [7.4p1-17 + 0.10.3-2] - Fix for CVE-2018-15473 (#1619079) - Enable GCM mode for AES ciphers in FIPS mode (#1600869) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2143.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>systemd-libs</strong> <span>219-62.0.4.el7_6.9</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2091"></a>
+                                                <strong class="name">ELSA-2019-2091</strong>
+                                                <div> [219-67.0.1] - do not create utmp update symlinks for reboot and poweroff [Orabug: 27854896] - OL7 udev rule for virtio net standby interface [Orabug: 28826743] - fix _netdev is missing for iscsi entry in /etc/fstab [Orabug: 25897792] (tony.l.lam@oracle.com) - set 'RemoveIPC=no' in logind.conf as default for OL7.2 [22224874] - allow dm remove ioctl to co-operate with UEK3 (Vaughan Cao) [Orabug: 18467469] - add hv dynamic memory support (Jerry Snitselaar) [Orabug: 18621475] [219-67] - fix mis-merge (#1714503) - fs-util: chase_symlinks(): prevent double fre (#1714782) [219-66] - sd-bus: unify three code-paths which free struct bus_container (#1643394) - hashmap: dont use mempool (#1609349) - man: be more explicit about thread safety of sd_journal (#1609349) - selinux: dont log SELINUX_INFO and SELINUX_WARNING messages to audit (#1240730) [219-65] - backport fd_is_fs_type (#1663143) - backport chase_symlinks (#1663143) - fs-util: add new CHASE_SAFE flag to chase_symlinks() (#1663143) - fs-util: add new chase_symlinks() flag CHASE_OPEN (#1663143) - sd-dameon: also sent ucred when our UID differs from EUID (#1663143) - notify: add new --uid= command (#1663143) - core: be stricter when handling PID files and MAINPID sd_notify() messages (#1663143) - journald: respect KeepFree= as well as MaxUse= values (#1361893) - shutdown: in_container was used before its definition (#1693716) - core: Fix edge case when processing /proc/self/mountinfo (#1691511) - sd-bus: deal with cookie overruns (#1693559) - Refuse dbus message paths longer than BUS_PATH_SIZE_MAX limit. (#1667871) - Allocate temporary strings to hold dbus paths on the heap (#1667871) - sd-bus: if we receive an invalid dbus message, ignore and proceeed (#1667871) - udev: check if the spawned PID didnt exit after reaping unexpected PID (#1697909) - udev: call poll() again after killing the spawned process (#1697909) - udev: check age against both timeouts to prevent integer wraparound (#1697909) - avoid possible hang if our child process hangs (#1697909) - missing: when adding syscall replacements, use different names (#1694605) - include sys/sysmacros.h in more places (#1694605) [219-64] - detect-virt: do not try to read all of /proc/cpuinfo (#1631531) - core: disable the effect of Restart= if theres a stop job pending for a service (#6581) (#1626382) - networkd: respect DHCP UseRoutes option (#1663365) - networkd: fix dhcp4 link without routes not being considered ready (#8728) (#1663365) - networkd: dont crash when mtu changes (#6594) (#1663365) - tmpfiles: 'e' takes globs (#1641764) - tmpfiles: 'e' is supposed to operate on directory only (#1641764) - tmpfiles: 'e' is supposed to accept shell-style globs (#1641764) - bus-message: do not crash on message with a string of zero length (#1643396) - Revert 'bus: when dumping string property values escape the chars we use as end-of-line and end-of-item marks' (#1643172) - set automount state to waiting when the mount is stopped (#1651257) - core: when deserializing state always use read_line(, LONG_LINE_MAX, ) (CVE-2018-15686) - shorten hostname before checking for trailing dot (#1631625) - journald: fixed assertion failure when system journal rotation fails (#9893) (#1619543) - local-addresses: handle gracefully if routes lack an RTA_OIF attribute (#1627750) - rules: fix memory hotplug rule so systemd-detect-virt does not run too often (#1666612) - 6647 - use path_startswith('/dev') in cryptsetup (#6732) (#1664695) - core: mount-setup: handle non-existing mountpoints gracefully (#1585411) - units/rescue.service.in: fix announcement message (#1660422) - systemctl: Allow 'edit' and 'cat' on unloaded units (#1649518) - main: improve RLIMIT_NOFILE handling (#5795) (#1585913) - shared/sleep-config: exclude zram devices from hibernation candidates (#1609816) - journalctl: allow --file/--directory with --boot or --list-boots (#1463678) - journalct: allow --boot=0 to DTRT with --file/--directory (#1463678) - journal-remote: show error message if output file name does not end with .journal (bz#1267552) - artificially serialize building of .policy files (#1272485) - cryptsetup: add support for sector-size= option (#9936) (#1571801) - cryptsetup: do not define arg_sector_size if libgcrypt is v1.x (#9990) (#1571801) - journal: fix syslog_parse_identifier() (#1657794) - journal: do not remove multiple spaces after identifier in syslog message (#1657794) - tmpfiles: change ownership of symlinks too (#1620110) - tmpfiles: fix check for figuring out whether to call chmod() (#1620110) - shared/install: allow 'enable' on linked unit files (#1628575) [219-63] - dhcp6: make sure we have enough space for the DHCP6 option header (CVE-2018-15688) - journald: do not store the iovec entry for process commandline on stack (#1657788) - journald: set a limit on the number of fields (1k) (#1657792) - journal-remote: set a limit on the number of fields in a message (#1657792) - journald: free cmdline buffers owned by iovec (#1666646) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2091.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>glibc-common</strong> <span>2.17-260.0.17.el7_6.6</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2118"></a>
+                                                <strong class="name">ELSA-2019-2118</strong>
+                                                <div> [2.17-292.0.1.7] - Remove glibc-ora28641867.patch as duplicate of glibc-rh1705899-4.patch - Make _IO_funlockfile match __funlockfile and _IO_flockfile match __flockfile   Both should test     if ((stream->_flags & _IO_USER_LOCK) == 0)       _IO_lock_lock (*stream->_lock);   OraBug 28481550.   Reviewed-by: Jose E. Marchesi <jose.marchesi@oracle.com> - Modify glibc-ora28849085.patch so it works with RHCK kernels.   Orabug 28849085. - Reviewed-by: Egeyar Bagcioglu <egeyar.bagcioglu@oracle.com> - Use NLM_F_SKIP_STATS in uek2 and RTEXT_FILTER_SKIP_STATS in uek4 in getifaddrs. - Orabug 28849085 - Reviewed-by: Patrick McGehearty <patrick.mcgehearty@oracle.com> - Mention CVE numbers in the .spec file for CVE-2015-8983 and CVE-2015-8984. - Orabug 25558067. - Reviewed-by: Egeyar Bagcioglu <egeyar.bagcioglu@oracle.com> - Regenerate plural.c - OraBug 28806294. - Reviewed-by: Jose E. Marchesi <jose.marchesi@oracle.com> - intl: Port to Bison 3.0 - Backport of upstream gettext commit 19f23e290a5e4a82b9edf9f5a4f8ab6192871be9 - OraBug 28806294. - Reviewed-by: Patrick McGehearty <patrick.mcgehearty@oracle.com> - Fix dbl-64/wordsize-64 remquo (bug 17569). - Backport of upstream d9afe48d55a412e76b0dcb28335fd4b390fe07ae - OraBug 19570749. - Reviewed-by: Jose E. Marchesi <jose.marchesi@oracle.com> - libio: Disable vtable validation in case of interposition. - Backport of upstream c402355dfa7807b8e0adb27c009135a7e2b9f1b0. - OraBug 28641867. - Reviewed-by: Egeyar Bagcioglu <egeyar.bagcioglu@oracle.com> - Include-linux-falloc.h-in-bits-fcntl-linux.h - Defines FALLOC_FL_PUNSH_HOLE, FALLOC_FL_KEEP_SIZE,   FALLOC_FL_COLLAPSE_RANGE, and FALLOC_FL_ZERO_RANGE - OraBug 28483336 - Add MAP_SHARED_VALIDATE and MAP_SYNC flags to - sysdeps/unix/sysv/linux/x86/bits/mman.h - OraBug 28389572 - Update bits/siginfo.h with Linux hwpoison SIGBUS changes. - Adds new SIGBUS error codes for hardware poison signals, syncing with   the current kernel headers (v3.9). - It also adds si_trapno field for alpha. - New values: BUS_MCEERR_AR, BUS_MCEERR_AO - OraBug 28124569 [2.17-292] - Avoid iconv hang on invalid multi-byte sequences (#1427734) [2.17-291] - Use versioned Obsoletes: for nss_db (#1703565) [2.17-290] - Adjust to find-debuginfo.sh changes (#1661508) [2.17-289] - ja_JP: Add new Japanese Era name (#1555189) [2.17-288] - Unify and improve pthread_once implementation for all architectures (#1163509) [2.17.287] - malloc: Always call memcpy in _int_realloc (#1662842) [2.17-286] - Update comments in nscd.conf and nsswitch.conf (#1488370) [2.17-285] - intl: Ensure plural.c is current to prevent regenerating it (#1640764) [2.17-284] - Update <netinet/in.h> to include IP*_PMTUDISC_OMIT and others (#1684874) [2.17-283] - elf: Adjust the big PT_NOTE test to exercise the bug in more cases (#1579739) [2.17-282] - x86: Fix incorrect selection of string functions (#1641981) [2.17-281] - elf: Avoid stack overflow with large PT_NOTE segments (#1579739) [2.17-280] - resolv: Fully initialize sendmmsg argument data (#1579354) [2.17-279] - Improve formatting of Netlink error messages (#1443872) [2.17-278] - Run resolv/tst-inet_aton_exact test (#1673465) [2.17-277] - getifaddrs could return interfaces with ifa_name set to NULL (#1472832) [2.17-276] - Terminate process on invalid netlink response from kernel (#1443872) [2.17-275] - resolv: Support host names with trailing dashes (#1039304) [2.17-274] - CVE-2016-10739: Reject trailing characters in getaddrinfo (#1673465) [2.17-273] - Update syscall list for Linux 4.20 (#1657015) [2.17-272] - glibc-headers: Add ipc STAT_ANY constants (#1592475) [2.17-271] - localedata: Make IBM273 compatible with ISO-8859-1 (#1591268) [2.17-270] - Fix pldd race condition that may leave the process stopped after   detaching. (#1609067) [2.17-269] - libanl: properly cleanup if first helper thread creation failed (#1646373) [2.17-268] - Add note about missing test case for BZ1457479 (#1635325) [2.17-267] - elf: Fix data race in _dl_profile_fixup (#1630440) [2.17-266] - Fix i386 sigaction sa_restorer initialization (#1579730) [2.17-265] - Fix compilation error in stdlib/tst-strtod-overflow.c (#1647490) [2.17-264] - aarch64: Disable lazy symbol binding of TLSDESC (#1639524) [2.17-263] - Reduce RAM requirements for stdlib/test-bz22786 (#1647490) [2.17-262] - libio vtable validation improvements (#1595191) [2.17-261] - Update support/ to the most recent upstream version (#1595191) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2118.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libcurl</strong> <span>7.29.0-51.0.1.el7_6.3</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="ELSA-2019-2181"></a>
+                                                <strong class="name">ELSA-2019-2181</strong>
+                                                <div> [7.29.0-54.0.1] - Security Fixes [OraBug: 28939992] - CVE-2016-8615 cookie injection for other servers (https://curl.haxx.se/docs/CVE-2016-8615.html) - CVE-2016-8616 case insensitive password comparison (https://curl.haxx.se/docs/CVE-2016-8616.html) - CVE-2016-8617 OOB write via unchecked multiplication (https://curl.haxx.se/docs/CVE-2016-8617.html) - CVE-2016-8618 double-free in curl_maprintf (https://curl.haxx.se/docs/CVE-2016-8618.html) - CVE-2016-8619 double-free in krb5 code (https://curl.haxx.se/docs/CVE-2016-8619.html) - CVE-2016-8621 curl_getdate read out of bounds (https://curl.haxx.se/docs/CVE-2016-8621.html) - CVE-2016-8622 URL unescape heap overflow via integer truncation (https://curl.haxx.se/docs/CVE-2016-8622.html) - CVE-2016-8623 Use-after-free via shared cookies (https://curl.haxx.se/docs/CVE-2016-8623.html) - CVE-2016-8624 invalid URL parsing with # (https://curl.haxx.se/docs/CVE-2016-8624.html) [7.29.0-54] - make 'curl --tlsv1' backward compatible (#1672639) [7.29.0-53] - backport the --tls-max option of curl and TLS 1.3 ciphers (#1672639) [7.29.0-52] - prevent curl --rate-limit from hanging on file URLs (#1281969) - fix NTLM password overflow via integer overflow (CVE-2018-14618) - fix bad arithmetic when outputting warnings to stderr (CVE-2018-16842) - backport options to force TLS 1.3 in curl and libcurl (#1672639) - prevent curl --rate-limit from crashing on https URLs (#1683292) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2181.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>python-libs</strong> <span>2.7.5-80.0.1.el7_6</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2030"></a>
+                                                <strong class="name">ELSA-2019-2030</strong>
+                                                <div> [2.7.5-86.0.1] - Add Oracle Linux distribution in platform.py [orabug 20812544] [2.7.5-86] - Security fix for CVE-2019-10160 Resolves: rhbz#1718388 [2.7.5-85] - Security fix for CVE-2019-9948 Resolves: rhbz#1704174 [2.7.5-84] - Disallow control chars in http URLs - Fixes CVE-2019-9740 and CVE-2019-9947 Resolves: rhbz#1704362 and rhbz#1703530 [2.7.5-83] - Remove unversioned obsoletes Resolves: rhbz#1703600 [2.7.5-82] - Updated fix for CVE-2019-9636 Resolves: rhbz#1689317 [2.7.5-81] - Security fix for CVE-2019-9636 Resolves: rhbz#1689317 </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2030.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>nss-sysinit</strong> <span>3.36.0-7.1.el7_6</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2237"></a>
+                                                <strong class="name">ELSA-2019-2237</strong>
+                                                <div> nspr [4.21.0-1] - Rebase to NSPR 4.21 nss [3.44.0-4] - Fix certutil man page - Fix extracting a public key from a private key for dh, ec, and dsa [3.44.0-3] - Disable TLS 1.3 under FIPS mode - Disable RSASSA-PKCS1-v1_5 in TLS 1.3 - Fix post-handshake auth transcript calculation if   SSL_ENABLE_SESSION_TICKETS is set [3.44.0-2] - Skip sysinit gtests properly - Fix shell syntax error in tests/ssl/ssl.sh - Regenerate manual pages [3.44.0-1] - Rebase to NSS 3.44 - Restore fix-min-library-version-in-SSLVersionRange.patch to keep   SSL3 supported in the code level while it is disabled by policy - Skip TLS 1.3 tests under FIPS mode [3.43.0-9] - Ignore system policy when running %check [3.43.0-8] - Fix policy string [3.43.0-7] - Dont override date in man-pages - Revert the change to use XDG basedirs (mozilla#818686) - Enable SSL2 compatible ClientHello by default - Disable SSL3 and RC4 by default [3.43.0-6] - Make '-V ssl3:' option work with tools [3.43.0-5] - Fix regression in MD5 disablement [3.43.0-4] - add certutil documentation [3.43.0-3] - Restore complete removal of SSLv2 - Disable SSLv3 - Move signtool to unsupported directory [3.43.0-2] - Expand IPSEC usage to include ssl and email certs. Remove special   processing of the usage based on the critical flag [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-8.1] - move key on unwrap failure and retry. [3.36.0-8] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 nss-softokn [3.44.0-5.0.1] - Add fips140-2 DSA Known Answer Test fix [Orabug: 26679337] - Add fips140-2 ECDSA/RSA/DSA Pairwise Consistency Test fix [Orabug: 26617814],   [Orabug: 26617879], [Orabug: 26617849] [3.44.0-5] - Add pub from priv mechanism [3.44.0-4] - Add ike mechanisms - FIPS update [3.44.0-3] - Remove stray 'exit' in %prep [3.44.0-2] - Fix nss-softokn-fs-probe.patch to detect threshold correctly [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-5] - Restore nss-softokn-fs-probe.patch [3.43.0-4] - Enable iquote.patch [3.43.0-2] - Rebuild nss-util [3.44.0-3] - Add pub from priv mechanism - ike mechanisms should not overlap with JPAKE [3.44.0-2] - Add ike mechanisms [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-2] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2237.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dhcp-libs</strong> <span>12:4.2.5-68.0.1.el7_5.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2060"></a>
+                                                <strong class="name">ELSA-2019-2060</strong>
+                                                <div> [12:4.2.5-77.0.1] - Direct users to Oracle Linux support site. [12:4.2.5-77] - Resolves: #1712414 - Reset signal handlers set by isclib [12:4.2.5-76] - Resolves: #1704675 - Fix crash of dhcpd(6) triggered by bind rebase [12:4.2.5-75] - Resolves: #1672308 - Do not restart dhcp on NetworkManagers up events [12:4.2.5-74] - Use bind-export-libs package instead of bind99 - Use isc-config.sh to configure bind libs - Change requirement to bind-export-devel - Compile with recent bind includes, that does not include isc/util.h [12:4.2.5-73] - Resolves: #1635181 - Change default ipv6 prefix to /128. - Allow its customization via cl option [12:4.2.5-72] - Resolves: #1647784 - Update renew time if it is greater than expiry [12:4.2.5-71] - Resolves: #1623792 - Load leases file in tracing mode only [12:4.2.5-70] - Resolves: #1574292 - Fix options conflict for ddns update [12:4.2.5-69] - Resolves: #1570895 - Fix command execution vulnerability (CVE-2018-1111) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2060.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>elfutils-libelf</strong> <span>0.172-2.el7</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="ELSA-2019-2197"></a>
+                                                <strong class="name">ELSA-2019-2197</strong>
+                                                <div> [0.176-2] - Add elfutils-0.176-xlate-note.patch (#1704754) [0.176-1] - New upstream release (#1676504)   CVE-2019-7146, CVE-2019-7148, CVE-2019-7149, CVE-2019-7150,   CVE-2019-7664, CVE-2019-7665, CVE-2018-16062, CVE-2018-16402,   CVE-2018-16403, CVE-2018-18310, CVE-2018-18521, CVE-2018-18520. </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2197.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>nss</strong> <span>3.36.0-7.1.el7_6</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2237"></a>
+                                                <strong class="name">ELSA-2019-2237</strong>
+                                                <div> nspr [4.21.0-1] - Rebase to NSPR 4.21 nss [3.44.0-4] - Fix certutil man page - Fix extracting a public key from a private key for dh, ec, and dsa [3.44.0-3] - Disable TLS 1.3 under FIPS mode - Disable RSASSA-PKCS1-v1_5 in TLS 1.3 - Fix post-handshake auth transcript calculation if   SSL_ENABLE_SESSION_TICKETS is set [3.44.0-2] - Skip sysinit gtests properly - Fix shell syntax error in tests/ssl/ssl.sh - Regenerate manual pages [3.44.0-1] - Rebase to NSS 3.44 - Restore fix-min-library-version-in-SSLVersionRange.patch to keep   SSL3 supported in the code level while it is disabled by policy - Skip TLS 1.3 tests under FIPS mode [3.43.0-9] - Ignore system policy when running %check [3.43.0-8] - Fix policy string [3.43.0-7] - Dont override date in man-pages - Revert the change to use XDG basedirs (mozilla#818686) - Enable SSL2 compatible ClientHello by default - Disable SSL3 and RC4 by default [3.43.0-6] - Make '-V ssl3:' option work with tools [3.43.0-5] - Fix regression in MD5 disablement [3.43.0-4] - add certutil documentation [3.43.0-3] - Restore complete removal of SSLv2 - Disable SSLv3 - Move signtool to unsupported directory [3.43.0-2] - Expand IPSEC usage to include ssl and email certs. Remove special   processing of the usage based on the critical flag [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-8.1] - move key on unwrap failure and retry. [3.36.0-8] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 nss-softokn [3.44.0-5.0.1] - Add fips140-2 DSA Known Answer Test fix [Orabug: 26679337] - Add fips140-2 ECDSA/RSA/DSA Pairwise Consistency Test fix [Orabug: 26617814],   [Orabug: 26617879], [Orabug: 26617849] [3.44.0-5] - Add pub from priv mechanism [3.44.0-4] - Add ike mechanisms - FIPS update [3.44.0-3] - Remove stray 'exit' in %prep [3.44.0-2] - Fix nss-softokn-fs-probe.patch to detect threshold correctly [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-5] - Restore nss-softokn-fs-probe.patch [3.43.0-4] - Enable iquote.patch [3.43.0-2] - Rebuild nss-util [3.44.0-3] - Add pub from priv mechanism - ike mechanisms should not overlap with JPAKE [3.44.0-2] - Add ike mechanisms [3.44.0-1] - Rebase to NSS 3.44 [3.43.0-1] - Rebase to NSS 3.43 [3.36.0-2] - Update the cert verify code to allow a new ipsec usage and follow RFC 4945 </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2237.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>curl</strong> <span>7.29.0-51.0.1.el7_6.3</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="ELSA-2019-2181"></a>
+                                                <strong class="name">ELSA-2019-2181</strong>
+                                                <div> [7.29.0-54.0.1] - Security Fixes [OraBug: 28939992] - CVE-2016-8615 cookie injection for other servers (https://curl.haxx.se/docs/CVE-2016-8615.html) - CVE-2016-8616 case insensitive password comparison (https://curl.haxx.se/docs/CVE-2016-8616.html) - CVE-2016-8617 OOB write via unchecked multiplication (https://curl.haxx.se/docs/CVE-2016-8617.html) - CVE-2016-8618 double-free in curl_maprintf (https://curl.haxx.se/docs/CVE-2016-8618.html) - CVE-2016-8619 double-free in krb5 code (https://curl.haxx.se/docs/CVE-2016-8619.html) - CVE-2016-8621 curl_getdate read out of bounds (https://curl.haxx.se/docs/CVE-2016-8621.html) - CVE-2016-8622 URL unescape heap overflow via integer truncation (https://curl.haxx.se/docs/CVE-2016-8622.html) - CVE-2016-8623 Use-after-free via shared cookies (https://curl.haxx.se/docs/CVE-2016-8623.html) - CVE-2016-8624 invalid URL parsing with # (https://curl.haxx.se/docs/CVE-2016-8624.html) [7.29.0-54] - make 'curl --tlsv1' backward compatible (#1672639) [7.29.0-53] - backport the --tls-max option of curl and TLS 1.3 ciphers (#1672639) [7.29.0-52] - prevent curl --rate-limit from hanging on file URLs (#1281969) - fix NTLM password overflow via integer overflow (CVE-2018-14618) - fix bad arithmetic when outputting warnings to stderr (CVE-2018-16842) - backport options to force TLS 1.3 in curl and libcurl (#1672639) - prevent curl --rate-limit from crashing on https URLs (#1683292) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2181.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>openssh-server</strong> <span>7.4p1-16.el7</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="ELSA-2019-2143"></a>
+                                                <strong class="name">ELSA-2019-2143</strong>
+                                                <div> [7.4p1-21 + 0.10.3-2] - Avoid double comma in the default cipher list in FIPS mode (#1722446) [7.4p1-20 + 0.10.3-2] - Revert the updating of cached passwd structure (#1712053) [7.4p1-19 + 0.10.3-2] - Update cached passwd structure after PAM authentication (#1674541) [7.4p1-18 + 0.10.3-2] - invalidate supplemental group cache used by temporarily_use_uid()   when the target uid differs (#1583735) [7.4p1-17 + 0.10.3-2] - Fix for CVE-2018-15473 (#1619079) - Enable GCM mode for AES ciphers in FIPS mode (#1600869) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2143.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>binutils</strong> <span>2.27-34.base.0.1.el7</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2075"></a>
+                                                <strong class="name">ELSA-2019-2075</strong>
+                                                <div> [2.27-41.base.0.1] - Complete the backport of upstream commit a5def14f1ca70e14d9433cb229c9369fa3051598   Add a test for R_386_GOT32/R_386_GOT32X IFUNC reloc error   [Orabug 27930573] - Reviewed-by: Jose E. Marchesi <jose.marchesi@oracle.com> [2.27-41.base] - Fix up some linker tests that fail because of the R_x86_64_GOTPCRELX patch.  (#1699745) [2.27-40.base] - Enable gold for PowerPC and s390x.  (#1670014) [2.27-39.base] - Fix a potential illegal memory access triggered by an integer overflow.  (#1665884) [2.27-38.base] - Disable optimizations of x06_64 PLT entries.  (#1624779) [2.27-37.base] - Add the .attach-to-group pseudo-op to the assembler.  (#1652587) [2.27-36.base] - Prevent resource exhaustion attacks on libibertys name demangling code.  (#1598561) [2.27-35.base] - Stop strip crashing when removing .comment sections.  (#1644632) </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2075.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>openssl-libs</strong> <span>1:1.0.2k-16.0.1.el7_6.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2304"></a>
+                                                <strong class="name">ELSA-2019-2304</strong>
+                                                <div> [1.0.2k-19.0.1] - Bump release for rebuild. [1.0.2k-19] - close the RSA decryption 9 lives of Bleichenbacher cat   timing side channel (#1649568) [1.0.2k-18] - fix CVE-2018-0734 - DSA signature local timing side channel - fix CVE-2019-1559 - 0-byte record padding oracle - close the RSA decryption One & done EM side channel (#1619558) [1.0.2k-17] - use SHA-256 in FIPS RSA pairwise key check - fix CVE-2018-5407 (and CVE-2018-0735) - EC signature local   timing side-channel key extraction </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2304.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>bind-libs-lite</strong> <span>32:9.9.4-74.el7_6.2</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="ELSA-2019-2057"></a>
+                                                <strong class="name">ELSA-2019-2057</strong>
+                                                <div> [32:9.11.4-9.P2] - Fix CVE-2019-6471 [32:9.11.4-8.P2] - Fix scriptlet errors when selinux-policy is not installed (#1647659) [32:9.11.4-7.P2] - Fix inefective limit of TCP clients (CVE-2018-5743) [32:9.11.4-6.P2] - Use /sbin/nologin again (#1676661) [32:9.11.4-5.P2] - Make sure selinux-policy is installed soon enough (#1647659) [32:9.11.4-4.P2] - Disable custom random generator for export libs (#1685940) [32:9.11.4-3.P2] - Fix memory handling in zone2ldap tool [32:9.11.4-2.P2] - Move dnssec utilities back to bind package - Remove separate python-bind package [32:9.11.4-1.P2] - Rebase features patches - Disable autodetected eddsa algorithm ED448 - Add versioned depends to all library subpackages - Fix multilib conflict of devel packages </div>
+                                                <a href="http://linux.oracle.com/errata/ELSA-2019-2057.html" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+            </div>
+    </div>
+    </section>
+    </div>
+
+    <script>
+        (function() {
+            const togglers = document.querySelectorAll('[data-toggle-layer]');
+            console.log(togglers);
+
+            for (var i = togglers.length - 1; i >= 0; i--) {
+                togglers[i].onclick = function(e) {
+                    e.target.parentNode.classList.toggle('closed');
+                };
+            }
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Clair Control report : pythonpillow/alpine</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,600italic,400italic,300italic,300' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: ghostwhite;
+            padding-bottom: 2em;
+        }
+        /* Typography */
+        
+        .lead {
+            font-size: 1.4em;
+        }
+        /* global layout */
+        
+        .container {
+            padding: 0 0;
+        }
+        
+        .clearfix:after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+        
+        .row {
+            margin: 0 -20px;
+        }
+        
+        .row:after {
+            display: block;
+            clear: both;
+        }
+        
+        [class*="col-"] {
+            padding: 0 20px;
+            float: left;
+            box-sizing: border-box;
+        }
+        
+        .col-6 {
+            width: 50%;
+        }
+        
+        .panel {
+            /* padding: 1em; */
+            border-radius: 4px;
+            background: white;
+            box-shadow: 0px 1px 2px #e2e2e2;
+        }
+        
+        .panel h2 {
+            margin-top: 0;
+            padding-bottom: .2em;
+            border-bottom: solid 1px gainsboro;
+        }
+        
+        .panel:last-child {
+            margin-bottom: 0;
+        }
+        /* Header */
+        
+        .app-header {
+            background: #2196F3;
+            color: white;
+            margin: 0 0px 0px 0px;
+            padding: 16px 20px;
+            box-shadow: 0 -2px 16px #263238;
+            position: relative;
+        }
+        
+        .app-header h1 {
+            margin: 0;
+            font-weight: lighter;
+            text-transform: uppercase;
+        }
+        
+        .app-intro {
+            padding: 20px;
+            text-align: center;
+            color: #263238;
+            background: rgba(255, 255, 255, .8);
+            border-bottom: solid 1px #ECEFF1;
+        }
+        
+        .app-intro h2 {
+            font-size: 2em;
+            font-weight: lighter;
+        }
+        
+        .summary {
+            line-height: .6em;
+        }
+        /* report */
+        
+        .report {
+            margin-top: 20px;
+        }
+        
+        .graph {
+            margin: 0 auto;
+            max-width: 960px;
+            margin-top: 30px;
+        }
+        /* Style of the graph */
+        
+        .graph .node {
+            position: relative;
+            display: inline-block;
+            height: 24px;
+            width: 24px;
+            margin: 2px;
+        }
+        
+        .graph .node .dot {
+            position: relative;
+            height: 24px;
+            width: 24px;
+            border-radius: 24px;
+            float: left;
+            background: gray;
+            /* box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+        border: solid 1px rgba(255, 255, 255, .2); */
+        }
+        
+        .graph .node.Defcon1 .dot {
+            background: black;
+        }
+        
+        .graph .node.Critical .dot {
+            background: #e81e1e;
+        }
+        
+        .graph .node.High .dot {
+            background: #E91E63;
+        }
+        
+        .graph .node.Medium .dot {
+            background: #FFA726;
+        }
+        
+        .graph .node.Low .dot {
+            background: #8BC34A;
+        }
+        
+        .graph .node.Negligible .dot {
+            background: #37474F;
+        }
+        
+        .graph .node.Unknown .dot {
+            background: #37474F;
+        }
+        
+        .graph .node .popup {
+            display: none;
+            width: 300px;
+            position: absolute;
+            bottom: 100%;
+            margin-bottom: 20px;
+            margin-left: -150px;
+            left: 2px;
+            background: white;
+            box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
+            padding: 10px;
+            border-radius: 4px;
+            /* border: solid 1px #e2e2e2; */
+            text-shadow: 0 0 0 transparent;
+        }
+        
+        .graph .node .popup:after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -10px;
+            display: block;
+            width: 0;
+            height: 0;
+            border-width: 10px 10px 0 10px;
+            border-color: white transparent transparent transparent;
+            border-style: solid;
+        }
+        
+        .graph .node .popup:before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -10px;
+            display: block;
+            width: 0;
+            height: 0;
+            border-width: 11px 11px 0 10px;
+            border-color: rgba(0, 0, 0, .2) transparent transparent transparent;
+            border-style: solid;
+        }
+        
+        .graph .node .popup > div {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .graph .node:hover .dot {
+            opacity: .8;
+        }
+        
+        .graph .node:hover .popup {
+            display: block;
+            max-height: 180px;
+            color: dimgray;
+        }
+        /* bars */
+        
+        .bar-bg {
+            display: inline-block;
+            width: 240px;
+            height: 6px;
+            position: relative;
+        }
+        
+        .bar-bar {
+            display: block;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            background: #E91E63;
+            border-radius: 2px;
+        }
+        
+        .bar-bar.Defcon1 {
+            background: black;
+        }
+        
+        .bar-bar.Critical {
+            background: #e81e1e;
+        }
+        
+        .bar-bar.High {
+            background: #E91E63;
+        }
+        
+        .bar-bar.Medium {
+            background: #FFA726;
+        }
+        
+        .bar-bar.Low {
+            background: #8BC34A;
+        }
+        
+        .bar-bar.Negligible {
+            background: #37474F;
+        }
+        
+        .bar-bar.Unknown {
+            background: #37474F;
+        }
+        /* vulnerabilities */
+        
+        .report {
+            margin: 18px auto;
+            max-width: 960px;
+        }
+        
+        .report .vulnerabilities,
+        .report .features > ul {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .report .features > ul {
+            list-style: none;
+        }
+        
+        .feature {
+            border-bottom: solid 1px #ECEFF1;
+        }
+        
+        .feature:last-child {
+            border-color: #CFD8DC;
+        }
+        
+        .feature__title {
+            padding: 1em;
+        }
+        
+        .vulnerabilities {
+            padding-left: 2.6em !important;
+        }
+        
+        .vulnerability {
+            padding-bottom: .8em;
+            padding-right: 2.2em;
+        }
+        
+        .vulnerabilities .Defcon1 .name {
+            color: black;
+        }
+        
+        .vulnerabilities .Critical .name {
+            color: #e81e1e;
+        }
+        
+        .vulnerabilities .High .name {
+            color: #E91E63;
+        }
+        
+        .vulnerabilities .Medium .name {
+            color: #FFA726;
+        }
+        
+        .vulnerabilities .Low .name {
+            color: #8BC34A;
+        }
+        
+        .vulnerabilities .Negligible .name {
+            color: #37474F;
+        }
+        
+        .vulnerabilities .Unknown .name {
+            color: #37474F;
+        }
+        /* layers */
+        
+        .layer .layer__title {
+            cursor: pointer;
+            padding: 1em;
+            border-bottom: solid 1px #CFD8DC;
+            color: #37474F;
+            margin: 0;
+        }
+        
+        .layer .layer__title:hover {
+            background: #ECEFF1;
+        }
+        
+        .layer.closed .features {
+            display: none;
+        }
+        
+        .summary-text {
+            display: flex;
+            max-width: 940px;
+            margin: 0 auto;
+            margin-bottom: 1em;
+            margin-top: 3em;
+        }
+        
+        .summary-text .node {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .summary-text .node:before {
+            content: '';
+            display: inline-block;
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            background: #2196F3;
+            margin-right: 10px;
+        }
+        
+        .summary-text .node.Defcon1:before {
+            background: black;
+        }
+        
+        .summary-text .node.Critical:before {
+            background: #e81e1e;
+        }
+        
+        .summary-text .node.High:before {
+            background: #E91E63;
+        }
+        
+        .summary-text .node.Medium:before {
+            background: #FFA726;
+        }
+        
+        .summary-text .node.Low:before {
+            background: #8BC34A;
+        }
+        
+        .summary-text .node.Negligible:before {
+            background: #37474F;
+        }
+        
+        .summary-text .node.Unknown:before {
+            background: #37474F;
+        }
+        
+        .relative-graph {
+            display: flex;
+            max-width: 940px;
+            margin: 0 auto;
+            background: #2196F3;
+            flex-direction: row-reverse;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .relative-graph .node {
+            text-align: center;
+            height: 8px;
+            background: #2196F3;
+        }
+        
+        .relative-graph .node.Defcon1 {
+            background: black;
+        }
+        
+        .relative-graph .node.Critical {
+            background: #e81e1e;
+        }
+        
+        .relative-graph .node.High {
+            background: #E91E63;
+        }
+        
+        .relative-graph .node.Medium {
+            background: #FFA726;
+        }
+        
+        .relative-graph .node.Low {
+            background: #8BC34A;
+        }
+        
+        .relative-graph .node.Negligible {
+            background: #37474F;
+        }
+        
+        .relative-graph .node.Unknown {
+            background: #37474F;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1>Clair Control report</h1>
+        </header>
+
+        <div class="app-intro clearfix">
+            <h2>Image: pythonpillow/alpine</h2>
+            
+
+            <section class="summary">
+                <div>
+                    
+                    <p><span class="lead"><strong>Total : 61 vulnerabilities</strong></span></p>
+                    </p>
+                    <div class="summary-text">
+                        
+                        <div class="node Unknown">Unknown : <strong>61</strong></div>
+                              
+                    </div>
+                    <div class="relative-graph">
+                        <div class="node Defcon1" style="width: 0%"></div>
+                        <div class="node Critical" style="width: 0%"></div>
+                        <div class="node High" style="width: 0%"></div>
+                        <div class="node Medium" style="width: 0%"></div>
+                        <div class="node Low" style="width: 0%"></div>
+                        <div class="node Negligible" style="width: 0%"></div>
+                        <div class="node Unknown" style="width: 100%"></div>
+                    </div>
+                    
+                </div>
+            </section>
+            
+            <div class="graph">
+                
+                
+                <a class="node Unknown" href="#CVE-2018-9251">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-9251</strong></div>
+                        <div>Unknown</div>
+                        <div>libxml2:2.9.4-r4</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-14404">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-14404</strong></div>
+                        <div>Unknown</div>
+                        <div>libxml2:2.9.4-r4</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-16931">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-16931</strong></div>
+                        <div>Unknown</div>
+                        <div>libxml2:2.9.4-r4</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-14567">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-14567</strong></div>
+                        <div>Unknown</div>
+                        <div>libxml2:2.9.4-r4</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-11233">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-11233</strong></div>
+                        <div>Unknown</div>
+                        <div>git:2.13.5-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-17456">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-17456</strong></div>
+                        <div>Unknown</div>
+                        <div>git:2.13.5-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-11235">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-11235</strong></div>
+                        <div>Unknown</div>
+                        <div>git:2.13.5-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-19486">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-19486</strong></div>
+                        <div>Unknown</div>
+                        <div>git:2.13.5-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2019-1559">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-1559</strong></div>
+                        <div>Unknown</div>
+                        <div>openssl:1.0.2k-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-0737">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-0737</strong></div>
+                        <div>Unknown</div>
+                        <div>openssl:1.0.2k-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-0732">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-0732</strong></div>
+                        <div>Unknown</div>
+                        <div>openssl:1.0.2k-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-3735">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-3735</strong></div>
+                        <div>Unknown</div>
+                        <div>openssl:1.0.2k-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-3736">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-3736</strong></div>
+                        <div>Unknown</div>
+                        <div>openssl:1.0.2k-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-0739">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-0739</strong></div>
+                        <div>Unknown</div>
+                        <div>openssl:1.0.2k-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-3737">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-3737</strong></div>
+                        <div>Unknown</div>
+                        <div>openssl:1.0.2k-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-0734">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-0734</strong></div>
+                        <div>Unknown</div>
+                        <div>openssl:1.0.2k-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-0733">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-0733</strong></div>
+                        <div>Unknown</div>
+                        <div>openssl:1.0.2k-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-5407">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-5407</strong></div>
+                        <div>Unknown</div>
+                        <div>openssl:1.0.2k-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-3738">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-3738</strong></div>
+                        <div>Unknown</div>
+                        <div>openssl:1.0.2k-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-18314">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-18314</strong></div>
+                        <div>Unknown</div>
+                        <div>perl:5.24.3-r1</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-18311">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-18311</strong></div>
+                        <div>Unknown</div>
+                        <div>perl:5.24.3-r1</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-18313">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-18313</strong></div>
+                        <div>Unknown</div>
+                        <div>perl:5.24.3-r1</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-18312">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-18312</strong></div>
+                        <div>Unknown</div>
+                        <div>perl:5.24.3-r1</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-6797">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-6797</strong></div>
+                        <div>Unknown</div>
+                        <div>perl:5.24.3-r1</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-12015">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-12015</strong></div>
+                        <div>Unknown</div>
+                        <div>perl:5.24.3-r1</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-6913">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-6913</strong></div>
+                        <div>Unknown</div>
+                        <div>perl:5.24.3-r1</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-6798">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-6798</strong></div>
+                        <div>Unknown</div>
+                        <div>perl:5.24.3-r1</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-11813">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-11813</strong></div>
+                        <div>Unknown</div>
+                        <div>libjpeg-turbo:1.5.1-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-15232">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-15232</strong></div>
+                        <div>Unknown</div>
+                        <div>libjpeg-turbo:1.5.1-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-1152">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-1152</strong></div>
+                        <div>Unknown</div>
+                        <div>libjpeg-turbo:1.5.1-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-18557">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-18557</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-8905">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-8905</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-17095">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-17095</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-9935">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-9935</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-10963">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-10963</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-17100">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-17100</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-12900">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-12900</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-10779">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-10779</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-7456">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-7456</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-5784">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-5784</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-11613">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-11613</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-18013">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-18013</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-16231">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-16231</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-17101">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-17101</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-16232">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-16232</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-18661">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-18661</strong></div>
+                        <div>Unknown</div>
+                        <div>tiff:4.0.8-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-1000158">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-1000158</strong></div>
+                        <div>Unknown</div>
+                        <div>python2:2.7.13-r1</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-1061">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-1061</strong></div>
+                        <div>Unknown</div>
+                        <div>python2:2.7.13-r1</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-1060">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-1060</strong></div>
+                        <div>Unknown</div>
+                        <div>python2:2.7.13-r1</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-5785">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-5785</strong></div>
+                        <div>Unknown</div>
+                        <div>openjpeg:2.2.0-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-14423">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-14423</strong></div>
+                        <div>Unknown</div>
+                        <div>openjpeg:2.2.0-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-17480">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-17480</strong></div>
+                        <div>Unknown</div>
+                        <div>openjpeg:2.2.0-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-14039">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-14039</strong></div>
+                        <div>Unknown</div>
+                        <div>openjpeg:2.2.0-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-18088">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-18088</strong></div>
+                        <div>Unknown</div>
+                        <div>openjpeg:2.2.0-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-6616">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-6616</strong></div>
+                        <div>Unknown</div>
+                        <div>openjpeg:2.2.0-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-6942">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-6942</strong></div>
+                        <div>Unknown</div>
+                        <div>freetype:2.7.1-r1</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-16544">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-16544</strong></div>
+                        <div>Unknown</div>
+                        <div>busybox:1.26.2-r7</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2017-15873">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-15873</strong></div>
+                        <div>Unknown</div>
+                        <div>busybox:1.26.2-r7</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-14600">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-14600</strong></div>
+                        <div>Unknown</div>
+                        <div>libx11:1.6.5-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-14598">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-14598</strong></div>
+                        <div>Unknown</div>
+                        <div>libx11:1.6.5-r0</div>
+                    </div>
+                </a>
+                
+                <a class="node Unknown" href="#CVE-2018-14599">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-14599</strong></div>
+                        <div>Unknown</div>
+                        <div>libx11:1.6.5-r0</div>
+                    </div>
+                </a>
+                
+                
+            </div>
+        </div>
+
+        <section class="report">
+            <div>
+                <div class="panel">
+                    <div class="layers">
+                        <div id="96f45b2d2d8da4d8e31d0cc2b313acbd9247ead67ef26bcc77d49825ff382155" class="layer">
+                            <h3 class="layer__title" data-toggle-layer="96f45b2d2d8da4d8e31d0cc2b313acbd9247ead67ef26bcc77d49825ff382155">96f45b2d2d8da4d8e31d0cc2b313acbd9247ead67ef26bcc77d49825ff382155</h3>
+                            <div class="features">
+                                <ul>
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libxml2</strong> <span>2.9.4-r4</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-9251"></a>
+                                                <strong class="name">CVE-2018-9251</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-9251" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-14404"></a>
+                                                <strong class="name">CVE-2018-14404</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-14404" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-16931"></a>
+                                                <strong class="name">CVE-2017-16931</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-16931" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-14567"></a>
+                                                <strong class="name">CVE-2018-14567</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-14567" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>git</strong> <span>2.13.5-r0</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-11233"></a>
+                                                <strong class="name">CVE-2018-11233</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-11233" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-17456"></a>
+                                                <strong class="name">CVE-2018-17456</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-17456" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-11235"></a>
+                                                <strong class="name">CVE-2018-11235</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-11235" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-19486"></a>
+                                                <strong class="name">CVE-2018-19486</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-19486" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>openssl</strong> <span>1.0.2k-r0</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2019-1559"></a>
+                                                <strong class="name">CVE-2019-1559</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-1559" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-0737"></a>
+                                                <strong class="name">CVE-2018-0737</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-0737" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-0732"></a>
+                                                <strong class="name">CVE-2018-0732</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-0732" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-3735"></a>
+                                                <strong class="name">CVE-2017-3735</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-3735" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-3736"></a>
+                                                <strong class="name">CVE-2017-3736</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-3736" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-0739"></a>
+                                                <strong class="name">CVE-2018-0739</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-0739" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-3737"></a>
+                                                <strong class="name">CVE-2017-3737</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-3737" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-0734"></a>
+                                                <strong class="name">CVE-2018-0734</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-0734" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-0733"></a>
+                                                <strong class="name">CVE-2018-0733</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-0733" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-5407"></a>
+                                                <strong class="name">CVE-2018-5407</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-5407" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-3738"></a>
+                                                <strong class="name">CVE-2017-3738</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-3738" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>perl</strong> <span>5.24.3-r1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-18314"></a>
+                                                <strong class="name">CVE-2018-18314</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-18314" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-18311"></a>
+                                                <strong class="name">CVE-2018-18311</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-18311" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-18313"></a>
+                                                <strong class="name">CVE-2018-18313</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-18313" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-18312"></a>
+                                                <strong class="name">CVE-2018-18312</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-18312" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-6797"></a>
+                                                <strong class="name">CVE-2018-6797</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-6797" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-12015"></a>
+                                                <strong class="name">CVE-2018-12015</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-12015" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-6913"></a>
+                                                <strong class="name">CVE-2018-6913</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-6913" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-6798"></a>
+                                                <strong class="name">CVE-2018-6798</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-6798" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libjpeg-turbo</strong> <span>1.5.1-r0</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-11813"></a>
+                                                <strong class="name">CVE-2018-11813</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-11813" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-15232"></a>
+                                                <strong class="name">CVE-2017-15232</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-15232" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-1152"></a>
+                                                <strong class="name">CVE-2018-1152</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-1152" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>tiff</strong> <span>4.0.8-r0</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-18557"></a>
+                                                <strong class="name">CVE-2018-18557</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-18557" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-8905"></a>
+                                                <strong class="name">CVE-2018-8905</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-8905" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-17095"></a>
+                                                <strong class="name">CVE-2017-17095</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-17095" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-9935"></a>
+                                                <strong class="name">CVE-2017-9935</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-9935" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-10963"></a>
+                                                <strong class="name">CVE-2018-10963</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-10963" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-17100"></a>
+                                                <strong class="name">CVE-2018-17100</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-17100" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-12900"></a>
+                                                <strong class="name">CVE-2018-12900</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-12900" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-10779"></a>
+                                                <strong class="name">CVE-2018-10779</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-10779" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-7456"></a>
+                                                <strong class="name">CVE-2018-7456</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-7456" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-5784"></a>
+                                                <strong class="name">CVE-2018-5784</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-5784" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-11613"></a>
+                                                <strong class="name">CVE-2017-11613</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-11613" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-18013"></a>
+                                                <strong class="name">CVE-2017-18013</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-18013" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-16231"></a>
+                                                <strong class="name">CVE-2017-16231</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-16231" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-17101"></a>
+                                                <strong class="name">CVE-2018-17101</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-17101" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-16232"></a>
+                                                <strong class="name">CVE-2017-16232</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-16232" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-18661"></a>
+                                                <strong class="name">CVE-2018-18661</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-18661" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>python2</strong> <span>2.7.13-r1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-1000158"></a>
+                                                <strong class="name">CVE-2017-1000158</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-1000158" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-1061"></a>
+                                                <strong class="name">CVE-2018-1061</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-1061" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-1060"></a>
+                                                <strong class="name">CVE-2018-1060</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-1060" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>openjpeg</strong> <span>2.2.0-r0</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-5785"></a>
+                                                <strong class="name">CVE-2018-5785</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-5785" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-14423"></a>
+                                                <strong class="name">CVE-2018-14423</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-14423" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-17480"></a>
+                                                <strong class="name">CVE-2017-17480</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-17480" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-14039"></a>
+                                                <strong class="name">CVE-2017-14039</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-14039" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-18088"></a>
+                                                <strong class="name">CVE-2018-18088</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-18088" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-6616"></a>
+                                                <strong class="name">CVE-2018-6616</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-6616" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>freetype</strong> <span>2.7.1-r1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-6942"></a>
+                                                <strong class="name">CVE-2018-6942</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-6942" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>busybox</strong> <span>1.26.2-r7</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-16544"></a>
+                                                <strong class="name">CVE-2017-16544</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-16544" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2017-15873"></a>
+                                                <strong class="name">CVE-2017-15873</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-15873" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libx11</strong> <span>1.6.5-r0</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-14600"></a>
+                                                <strong class="name">CVE-2018-14600</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-14600" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-14598"></a>
+                                                <strong class="name">CVE-2018-14598</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-14598" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Unknown">
+                                                <a class="vulnerability__title" name="CVE-2018-14599"></a>
+                                                <strong class="name">CVE-2018-14599</strong>
+                                                <div></div>
+                                                <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-14599" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+            </div>
+    </div>
+    </section>
+    </div>
+
+    <script>
+        (function() {
+            const togglers = document.querySelectorAll('[data-toggle-layer]');
+            console.log(togglers);
+
+            for (var i = togglers.length - 1; i >= 0; i--) {
+                togglers[i].onclick = function(e) {
+                    e.target.parentNode.classList.toggle('closed');
+                };
+            }
+        })();
+    </script>
+</body>
+
+</html>

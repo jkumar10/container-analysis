@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Clair Control report : groovy</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,600italic,400italic,300italic,300' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: ghostwhite;
+            padding-bottom: 2em;
+        }
+        /* Typography */
+        
+        .lead {
+            font-size: 1.4em;
+        }
+        /* global layout */
+        
+        .container {
+            padding: 0 0;
+        }
+        
+        .clearfix:after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+        
+        .row {
+            margin: 0 -20px;
+        }
+        
+        .row:after {
+            display: block;
+            clear: both;
+        }
+        
+        [class*="col-"] {
+            padding: 0 20px;
+            float: left;
+            box-sizing: border-box;
+        }
+        
+        .col-6 {
+            width: 50%;
+        }
+        
+        .panel {
+            /* padding: 1em; */
+            border-radius: 4px;
+            background: white;
+            box-shadow: 0px 1px 2px #e2e2e2;
+        }
+        
+        .panel h2 {
+            margin-top: 0;
+            padding-bottom: .2em;
+            border-bottom: solid 1px gainsboro;
+        }
+        
+        .panel:last-child {
+            margin-bottom: 0;
+        }
+        /* Header */
+        
+        .app-header {
+            background: #2196F3;
+            color: white;
+            margin: 0 0px 0px 0px;
+            padding: 16px 20px;
+            box-shadow: 0 -2px 16px #263238;
+            position: relative;
+        }
+        
+        .app-header h1 {
+            margin: 0;
+            font-weight: lighter;
+            text-transform: uppercase;
+        }
+        
+        .app-intro {
+            padding: 20px;
+            text-align: center;
+            color: #263238;
+            background: rgba(255, 255, 255, .8);
+            border-bottom: solid 1px #ECEFF1;
+        }
+        
+        .app-intro h2 {
+            font-size: 2em;
+            font-weight: lighter;
+        }
+        
+        .summary {
+            line-height: .6em;
+        }
+        /* report */
+        
+        .report {
+            margin-top: 20px;
+        }
+        
+        .graph {
+            margin: 0 auto;
+            max-width: 960px;
+            margin-top: 30px;
+        }
+        /* Style of the graph */
+        
+        .graph .node {
+            position: relative;
+            display: inline-block;
+            height: 24px;
+            width: 24px;
+            margin: 2px;
+        }
+        
+        .graph .node .dot {
+            position: relative;
+            height: 24px;
+            width: 24px;
+            border-radius: 24px;
+            float: left;
+            background: gray;
+            /* box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+        border: solid 1px rgba(255, 255, 255, .2); */
+        }
+        
+        .graph .node.Defcon1 .dot {
+            background: black;
+        }
+        
+        .graph .node.Critical .dot {
+            background: #e81e1e;
+        }
+        
+        .graph .node.High .dot {
+            background: #E91E63;
+        }
+        
+        .graph .node.Medium .dot {
+            background: #FFA726;
+        }
+        
+        .graph .node.Low .dot {
+            background: #8BC34A;
+        }
+        
+        .graph .node.Negligible .dot {
+            background: #37474F;
+        }
+        
+        .graph .node.Unknown .dot {
+            background: #37474F;
+        }
+        
+        .graph .node .popup {
+            display: none;
+            width: 300px;
+            position: absolute;
+            bottom: 100%;
+            margin-bottom: 20px;
+            margin-left: -150px;
+            left: 2px;
+            background: white;
+            box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
+            padding: 10px;
+            border-radius: 4px;
+            /* border: solid 1px #e2e2e2; */
+            text-shadow: 0 0 0 transparent;
+        }
+        
+        .graph .node .popup:after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -10px;
+            display: block;
+            width: 0;
+            height: 0;
+            border-width: 10px 10px 0 10px;
+            border-color: white transparent transparent transparent;
+            border-style: solid;
+        }
+        
+        .graph .node .popup:before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -10px;
+            display: block;
+            width: 0;
+            height: 0;
+            border-width: 11px 11px 0 10px;
+            border-color: rgba(0, 0, 0, .2) transparent transparent transparent;
+            border-style: solid;
+        }
+        
+        .graph .node .popup > div {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .graph .node:hover .dot {
+            opacity: .8;
+        }
+        
+        .graph .node:hover .popup {
+            display: block;
+            max-height: 180px;
+            color: dimgray;
+        }
+        /* bars */
+        
+        .bar-bg {
+            display: inline-block;
+            width: 240px;
+            height: 6px;
+            position: relative;
+        }
+        
+        .bar-bar {
+            display: block;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            background: #E91E63;
+            border-radius: 2px;
+        }
+        
+        .bar-bar.Defcon1 {
+            background: black;
+        }
+        
+        .bar-bar.Critical {
+            background: #e81e1e;
+        }
+        
+        .bar-bar.High {
+            background: #E91E63;
+        }
+        
+        .bar-bar.Medium {
+            background: #FFA726;
+        }
+        
+        .bar-bar.Low {
+            background: #8BC34A;
+        }
+        
+        .bar-bar.Negligible {
+            background: #37474F;
+        }
+        
+        .bar-bar.Unknown {
+            background: #37474F;
+        }
+        /* vulnerabilities */
+        
+        .report {
+            margin: 18px auto;
+            max-width: 960px;
+        }
+        
+        .report .vulnerabilities,
+        .report .features > ul {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .report .features > ul {
+            list-style: none;
+        }
+        
+        .feature {
+            border-bottom: solid 1px #ECEFF1;
+        }
+        
+        .feature:last-child {
+            border-color: #CFD8DC;
+        }
+        
+        .feature__title {
+            padding: 1em;
+        }
+        
+        .vulnerabilities {
+            padding-left: 2.6em !important;
+        }
+        
+        .vulnerability {
+            padding-bottom: .8em;
+            padding-right: 2.2em;
+        }
+        
+        .vulnerabilities .Defcon1 .name {
+            color: black;
+        }
+        
+        .vulnerabilities .Critical .name {
+            color: #e81e1e;
+        }
+        
+        .vulnerabilities .High .name {
+            color: #E91E63;
+        }
+        
+        .vulnerabilities .Medium .name {
+            color: #FFA726;
+        }
+        
+        .vulnerabilities .Low .name {
+            color: #8BC34A;
+        }
+        
+        .vulnerabilities .Negligible .name {
+            color: #37474F;
+        }
+        
+        .vulnerabilities .Unknown .name {
+            color: #37474F;
+        }
+        /* layers */
+        
+        .layer .layer__title {
+            cursor: pointer;
+            padding: 1em;
+            border-bottom: solid 1px #CFD8DC;
+            color: #37474F;
+            margin: 0;
+        }
+        
+        .layer .layer__title:hover {
+            background: #ECEFF1;
+        }
+        
+        .layer.closed .features {
+            display: none;
+        }
+        
+        .summary-text {
+            display: flex;
+            max-width: 940px;
+            margin: 0 auto;
+            margin-bottom: 1em;
+            margin-top: 3em;
+        }
+        
+        .summary-text .node {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .summary-text .node:before {
+            content: '';
+            display: inline-block;
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            background: #2196F3;
+            margin-right: 10px;
+        }
+        
+        .summary-text .node.Defcon1:before {
+            background: black;
+        }
+        
+        .summary-text .node.Critical:before {
+            background: #e81e1e;
+        }
+        
+        .summary-text .node.High:before {
+            background: #E91E63;
+        }
+        
+        .summary-text .node.Medium:before {
+            background: #FFA726;
+        }
+        
+        .summary-text .node.Low:before {
+            background: #8BC34A;
+        }
+        
+        .summary-text .node.Negligible:before {
+            background: #37474F;
+        }
+        
+        .summary-text .node.Unknown:before {
+            background: #37474F;
+        }
+        
+        .relative-graph {
+            display: flex;
+            max-width: 940px;
+            margin: 0 auto;
+            background: #2196F3;
+            flex-direction: row-reverse;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .relative-graph .node {
+            text-align: center;
+            height: 8px;
+            background: #2196F3;
+        }
+        
+        .relative-graph .node.Defcon1 {
+            background: black;
+        }
+        
+        .relative-graph .node.Critical {
+            background: #e81e1e;
+        }
+        
+        .relative-graph .node.High {
+            background: #E91E63;
+        }
+        
+        .relative-graph .node.Medium {
+            background: #FFA726;
+        }
+        
+        .relative-graph .node.Low {
+            background: #8BC34A;
+        }
+        
+        .relative-graph .node.Negligible {
+            background: #37474F;
+        }
+        
+        .relative-graph .node.Unknown {
+            background: #37474F;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1>Clair Control report</h1>
+        </header>
+
+        <div class="app-intro clearfix">
+            <h2>Image: groovy</h2>
+            
+
+            <section class="summary">
+                <div>
+                    
+                    <p><span class="lead"><strong>Total : 45 vulnerabilities</strong></span></p>
+                    </p>
+                    <div class="summary-text">
+                         
+                        <div class="node Negligible">Negligible : <strong>12</strong></div>
+                         
+                        <div class="node Low">Low : <strong>24</strong></div>
+                         
+                        <div class="node Medium">Medium : <strong>9</strong></div>
+                           
+                    </div>
+                    <div class="relative-graph">
+                        <div class="node Defcon1" style="width: 0%"></div>
+                        <div class="node Critical" style="width: 0%"></div>
+                        <div class="node High" style="width: 0%"></div>
+                        <div class="node Medium" style="width: 20%"></div>
+                        <div class="node Low" style="width: 53.34%"></div>
+                        <div class="node Negligible" style="width: 26.67%"></div>
+                        <div class="node Unknown" style="width: 0%"></div>
+                    </div>
+                    
+                </div>
+            </section>
+            
+            <div class="graph">
+                
+                
+                <a class="node Low" href="#CVE-2018-1000035">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-1000035</strong></div>
+                        <div>Low</div>
+                        <div>unzip:6.0-21ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2019-17543">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-17543</strong></div>
+                        <div>Low</div>
+                        <div>lz4:0.0~r131-2ubuntu3</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2019-12098">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-12098</strong></div>
+                        <div>Low</div>
+                        <div>heimdal:7.5.0+dfsg-1</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2019-9169">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-9169</strong></div>
+                        <div>Low</div>
+                        <div>glibc:2.27-3ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2016-10739">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2016-10739</strong></div>
+                        <div>Low</div>
+                        <div>glibc:2.27-3ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2009-5155">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2009-5155</strong></div>
+                        <div>Low</div>
+                        <div>glibc:2.27-3ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2015-8985">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2015-8985</strong></div>
+                        <div>Low</div>
+                        <div>glibc:2.27-3ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2017-11164">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-11164</strong></div>
+                        <div>Low</div>
+                        <div>pcre3:2:8.39-9</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2018-16868">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-16868</strong></div>
+                        <div>Low</div>
+                        <div>gnutls28:3.5.18-1ubuntu1.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2018-16869">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-16869</strong></div>
+                        <div>Low</div>
+                        <div>nettle:3.4-1</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2018-14048">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-14048</strong></div>
+                        <div>Low</div>
+                        <div>libpng1.6:1.6.34-1ubuntu0.18.04.2</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2019-1549">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-1549</strong></div>
+                        <div>Low</div>
+                        <div>openssl:1.1.1-1ubuntu2.1~18.04.4</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2019-1563">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-1563</strong></div>
+                        <div>Low</div>
+                        <div>openssl:1.1.1-1ubuntu2.1~18.04.4</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2019-1547">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-1547</strong></div>
+                        <div>Low</div>
+                        <div>openssl:1.1.1-1ubuntu2.1~18.04.4</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2019-3843">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-3843</strong></div>
+                        <div>Low</div>
+                        <div>systemd:237-3ubuntu10.31</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2019-3844">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-3844</strong></div>
+                        <div>Low</div>
+                        <div>systemd:237-3ubuntu10.31</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2019-12904">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-12904</strong></div>
+                        <div>Low</div>
+                        <div>libgcrypt20:1.8.1-4ubuntu1.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2018-7169">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-7169</strong></div>
+                        <div>Low</div>
+                        <div>shadow:1:4.5-1ubuntu2</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2013-4235">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2013-4235</strong></div>
+                        <div>Low</div>
+                        <div>shadow:1:4.5-1ubuntu2</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2016-2781">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2016-2781</strong></div>
+                        <div>Low</div>
+                        <div>coreutils:8.28-1ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2017-14159">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-14159</strong></div>
+                        <div>Low</div>
+                        <div>openldap:2.4.45+dfsg-1ubuntu1.4</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2019-16168">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-16168</strong></div>
+                        <div>Low</div>
+                        <div>sqlite3:3.22.0-1ubuntu0.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2019-5827">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-5827</strong></div>
+                        <div>Low</div>
+                        <div>sqlite3:3.22.0-1ubuntu0.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Low" href="#CVE-2018-20482">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-20482</strong></div>
+                        <div>Low</div>
+                        <div>tar:1.29b-2ubuntu0.1</div>
+                    </div>
+                </a>
+                
+                
+                
+                <a class="node Medium" href="#CVE-2018-19591">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-19591</strong></div>
+                        <div>Medium</div>
+                        <div>glibc:2.27-3ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#CVE-2018-11237">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-11237</strong></div>
+                        <div>Medium</div>
+                        <div>glibc:2.27-3ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#CVE-2018-11236">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-11236</strong></div>
+                        <div>Medium</div>
+                        <div>glibc:2.27-3ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#CVE-2019-13050">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-13050</strong></div>
+                        <div>Medium</div>
+                        <div>gnupg2:2.2.4-1ubuntu1.2</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#CVE-2018-20217">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-20217</strong></div>
+                        <div>Medium</div>
+                        <div>krb5:1.16-2ubuntu0.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#CVE-2018-20839">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-20839</strong></div>
+                        <div>Medium</div>
+                        <div>systemd:237-3ubuntu10.31</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#CVE-2019-13627">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-13627</strong></div>
+                        <div>Medium</div>
+                        <div>libgcrypt20:1.8.1-4ubuntu1.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#CVE-2019-9513">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-9513</strong></div>
+                        <div>Medium</div>
+                        <div>nghttp2:1.30.0-1ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Medium" href="#CVE-2019-9511">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-9511</strong></div>
+                        <div>Medium</div>
+                        <div>nghttp2:1.30.0-1ubuntu1</div>
+                    </div>
+                </a>
+                
+                
+                
+                <a class="node Negligible" href="#CVE-2016-10228">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2016-10228</strong></div>
+                        <div>Negligible</div>
+                        <div>glibc:2.27-3ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Negligible" href="#CVE-2019-7309">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-7309</strong></div>
+                        <div>Negligible</div>
+                        <div>glibc:2.27-3ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Negligible" href="#CVE-2019-9192">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-9192</strong></div>
+                        <div>Negligible</div>
+                        <div>glibc:2.27-3ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Negligible" href="#CVE-2018-20796">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-20796</strong></div>
+                        <div>Negligible</div>
+                        <div>glibc:2.27-3ubuntu1</div>
+                    </div>
+                </a>
+                
+                <a class="node Negligible" href="#CVE-2017-7245">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-7245</strong></div>
+                        <div>Negligible</div>
+                        <div>pcre3:2:8.39-9</div>
+                    </div>
+                </a>
+                
+                <a class="node Negligible" href="#CVE-2017-7246">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-7246</strong></div>
+                        <div>Negligible</div>
+                        <div>pcre3:2:8.39-9</div>
+                    </div>
+                </a>
+                
+                <a class="node Negligible" href="#CVE-2018-5709">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-5709</strong></div>
+                        <div>Negligible</div>
+                        <div>krb5:1.16-2ubuntu0.1</div>
+                    </div>
+                </a>
+                
+                <a class="node Negligible" href="#CVE-2019-17594">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-17594</strong></div>
+                        <div>Negligible</div>
+                        <div>ncurses:6.1-1ubuntu1.18.04</div>
+                    </div>
+                </a>
+                
+                <a class="node Negligible" href="#CVE-2019-17595">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2019-17595</strong></div>
+                        <div>Negligible</div>
+                        <div>ncurses:6.1-1ubuntu1.18.04</div>
+                    </div>
+                </a>
+                
+                <a class="node Negligible" href="#CVE-2018-1000654">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-1000654</strong></div>
+                        <div>Negligible</div>
+                        <div>libtasn1-6:4.13-2</div>
+                    </div>
+                </a>
+                
+                <a class="node Negligible" href="#CVE-2017-8283">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2017-8283</strong></div>
+                        <div>Negligible</div>
+                        <div>dpkg:1.19.0.5ubuntu2.3</div>
+                    </div>
+                </a>
+                
+                <a class="node Negligible" href="#CVE-2018-7738">
+                    <div class="dot"></div>
+                    <div class="popup">
+                        <div><strong>CVE-2018-7738</strong></div>
+                        <div>Negligible</div>
+                        <div>util-linux:2.31.1-0.4ubuntu3.4</div>
+                    </div>
+                </a>
+                
+                
+            </div>
+        </div>
+
+        <section class="report">
+            <div>
+                <div class="panel">
+                    <div class="layers">
+                        <div id="60fd92ee3094f44efc445dcb9e96b87d467a7b6c3fe6715063a882600b825099" class="layer">
+                            <h3 class="layer__title" data-toggle-layer="60fd92ee3094f44efc445dcb9e96b87d467a7b6c3fe6715063a882600b825099">60fd92ee3094f44efc445dcb9e96b87d467a7b6c3fe6715063a882600b825099</h3>
+                            <div class="features">
+                                <ul>
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>unzip</strong> <span>6.0-21ubuntu1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2018-1000035"></a>
+                                                <strong class="name">CVE-2018-1000035</strong>
+                                                <div>A heap-based buffer overflow exists in Info-Zip UnZip version <= 6.00 in the processing of password-protected archives that allows an attacker to perform a denial of service or to possibly achieve code execution.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-1000035" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>lz4</strong> <span>0.0~r131-2ubuntu3</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2019-17543"></a>
+                                                <strong class="name">CVE-2019-17543</strong>
+                                                <div>LZ4 before 1.9.2 has a heap-based buffer overflow in LZ4_write32 (related to LZ4_compress_destSize), affecting applications that call LZ4_compress_fast with a large input. (This issue can also lead to data corruption.) NOTE: the vendor states "only a few specific / uncommon usages of the API are at risk."</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-17543" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>heimdal</strong> <span>7.5.0+dfsg-1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2019-12098"></a>
+                                                <strong class="name">CVE-2019-12098</strong>
+                                                <div>In the client side of Heimdal before 7.6.0, failure to verify anonymous PKINIT PA-PKINIT-KX key exchange permits a man-in-the-middle attack. This issue is in krb5_init_creds_step in lib/krb5/init_creds_pw.c.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-12098" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>glibc</strong> <span>2.27-3ubuntu1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="CVE-2018-19591"></a>
+                                                <strong class="name">CVE-2018-19591</strong>
+                                                <div>In the GNU C Library (aka glibc or libc6) through 2.28, attempting to resolve a crafted hostname via getaddrinfo() leads to the allocation of a socket descriptor that is not closed. This is related to the if_nametoindex() function.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-19591" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="CVE-2018-11237"></a>
+                                                <strong class="name">CVE-2018-11237</strong>
+                                                <div>An AVX-512-optimized implementation of the mempcpy function in the GNU C Library (aka glibc or libc6) 2.27 and earlier may write data beyond the target buffer, leading to a buffer overflow in __mempcpy_avx512_no_vzeroupper.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-11237" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="CVE-2018-11236"></a>
+                                                <strong class="name">CVE-2018-11236</strong>
+                                                <div>stdlib/canonicalize.c in the GNU C Library (aka glibc or libc6) 2.27 and earlier, when processing very long pathname arguments to the realpath function, could encounter an integer overflow on 32-bit architectures, leading to a stack-based buffer overflow and, potentially, arbitrary code execution.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-11236" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2019-9169"></a>
+                                                <strong class="name">CVE-2019-9169</strong>
+                                                <div>In the GNU C Library (aka glibc or libc6) through 2.29, proceed_next_node in posix/regexec.c has a heap-based buffer over-read via an attempted case-insensitive regular-expression match.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-9169" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2016-10739"></a>
+                                                <strong class="name">CVE-2016-10739</strong>
+                                                <div>In the GNU C Library (aka glibc or libc6) through 2.28, the getaddrinfo function would successfully parse a string that contained an IPv4 address followed by whitespace and arbitrary characters, which could lead applications to incorrectly assume that it had parsed a valid string, without the possibility of embedded HTTP headers or other potentially dangerous substrings.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2016-10739" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2009-5155"></a>
+                                                <strong class="name">CVE-2009-5155</strong>
+                                                <div>In the GNU C Library (aka glibc or libc6) before 2.28, parse_reg_exp in posix/regcomp.c misparses alternatives, which allows attackers to cause a denial of service (assertion failure and application exit) or trigger an incorrect result by attempting a regular-expression match.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2009-5155" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2015-8985"></a>
+                                                <strong class="name">CVE-2015-8985</strong>
+                                                <div>The pop_fail_stack function in the GNU C Library (aka glibc or libc6) allows context-dependent attackers to cause a denial of service (assertion failure and application crash) via vectors related to extended regular expression processing.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2015-8985" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Negligible">
+                                                <a class="vulnerability__title" name="CVE-2016-10228"></a>
+                                                <strong class="name">CVE-2016-10228</strong>
+                                                <div>The iconv program in the GNU C Library (aka glibc or libc6) 2.25 and earlier, when invoked with the -c option, enters an infinite loop when processing invalid multi-byte input sequences, leading to a denial of service.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2016-10228" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Negligible">
+                                                <a class="vulnerability__title" name="CVE-2019-7309"></a>
+                                                <strong class="name">CVE-2019-7309</strong>
+                                                <div>In the GNU C Library (aka glibc or libc6) through 2.29, the memcmp function for the x32 architecture can incorrectly return zero (indicating that the inputs are equal) because the RDX most significant bit is mishandled.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-7309" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Negligible">
+                                                <a class="vulnerability__title" name="CVE-2019-9192"></a>
+                                                <strong class="name">CVE-2019-9192</strong>
+                                                <div>** DISPUTED ** In the GNU C Library (aka glibc or libc6) through 2.29, check_dst_limits_calc_pos_1 in posix/regexec.c has Uncontrolled Recursion, as demonstrated by '(|)(\\1\\1)*' in grep, a different issue than CVE-2018-20796. NOTE: the software maintainer disputes that this is a vulnerability because the behavior occurs only with a crafted pattern.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-9192" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Negligible">
+                                                <a class="vulnerability__title" name="CVE-2018-20796"></a>
+                                                <strong class="name">CVE-2018-20796</strong>
+                                                <div>In the GNU C Library (aka glibc or libc6) through 2.29, check_dst_limits_calc_pos_1 in posix/regexec.c has Uncontrolled Recursion, as demonstrated by '(\227|)(\\1\\1|t1|\\\2537)+' in grep.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-20796" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>pcre3</strong> <span>2:8.39-9</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2017-11164"></a>
+                                                <strong class="name">CVE-2017-11164</strong>
+                                                <div>In PCRE 8.41, the OP_KETRMAX feature in the match function in pcre_exec.c allows stack exhaustion (uncontrolled recursion) when processing a crafted regular expression.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2017-11164" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Negligible">
+                                                <a class="vulnerability__title" name="CVE-2017-7245"></a>
+                                                <strong class="name">CVE-2017-7245</strong>
+                                                <div>Stack-based buffer overflow in the pcre32_copy_substring function in pcre_get.c in libpcre1 in PCRE 8.40 allows remote attackers to cause a denial of service (WRITE of size 4) or possibly have unspecified other impact via a crafted file.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2017-7245" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Negligible">
+                                                <a class="vulnerability__title" name="CVE-2017-7246"></a>
+                                                <strong class="name">CVE-2017-7246</strong>
+                                                <div>Stack-based buffer overflow in the pcre32_copy_substring function in pcre_get.c in libpcre1 in PCRE 8.40 allows remote attackers to cause a denial of service (WRITE of size 268) or possibly have unspecified other impact via a crafted file.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2017-7246" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>gnupg2</strong> <span>2.2.4-1ubuntu1.2</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="CVE-2019-13050"></a>
+                                                <strong class="name">CVE-2019-13050</strong>
+                                                <div>Interaction between the sks-keyserver code through 1.2.0 of the SKS keyserver network, and GnuPG through 2.2.16, makes it risky to have a GnuPG keyserver configuration line referring to a host on the SKS keyserver network. Retrieving data from this network may cause a persistent denial of service, because of a Certificate Spamming Attack.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-13050" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>krb5</strong> <span>1.16-2ubuntu0.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="CVE-2018-20217"></a>
+                                                <strong class="name">CVE-2018-20217</strong>
+                                                <div>A Reachable Assertion issue was discovered in the KDC in MIT Kerberos 5 (aka krb5) before 1.17. If an attacker can obtain a krbtgt ticket using an older encryption type (single-DES, triple-DES, or RC4), the attacker can crash the KDC by making an S4U2Self request.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-20217" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Negligible">
+                                                <a class="vulnerability__title" name="CVE-2018-5709"></a>
+                                                <strong class="name">CVE-2018-5709</strong>
+                                                <div>An issue was discovered in MIT Kerberos 5 (aka krb5) through 1.16. There is a variable "dbentry->n_key_data" in kadmin/dbutil/dump.c that can store 16-bit data but unknowingly the developer has assigned a "u4" variable to it, which is for 32-bit data. An attacker can use this vulnerability to affect other artifacts of the database as we know that a Kerberos database dump file contains trusted data.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-5709" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>gnutls28</strong> <span>3.5.18-1ubuntu1.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2018-16868"></a>
+                                                <strong class="name">CVE-2018-16868</strong>
+                                                <div>A Bleichenbacher type side-channel based padding oracle attack was found in the way gnutls handles verification of RSA decrypted PKCS#1 v1.5 data. An attacker who is able to run process on the same physical core as the victim process, could use this to extract plaintext or in some cases downgrade any TLS connections to a vulnerable server.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-16868" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>nettle</strong> <span>3.4-1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2018-16869"></a>
+                                                <strong class="name">CVE-2018-16869</strong>
+                                                <div>A Bleichenbacher type side-channel based padding oracle attack was found in the way nettle handles endian conversion of RSA decrypted PKCS#1 v1.5 data. An attacker who is able to run a process on the same physical core as the victim process, could use this flaw extract plaintext or in some cases downgrade any TLS connections to a vulnerable server.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-16869" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libpng1.6</strong> <span>1.6.34-1ubuntu0.18.04.2</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2018-14048"></a>
+                                                <strong class="name">CVE-2018-14048</strong>
+                                                <div>An issue has been found in libpng 1.6.34. It is a SEGV in the function png_free_data in png.c, related to the recommended error handling for png_read_image.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-14048" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>openssl</strong> <span>1.1.1-1ubuntu2.1~18.04.4</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2019-1549"></a>
+                                                <strong class="name">CVE-2019-1549</strong>
+                                                <div>OpenSSL 1.1.1 introduced a rewritten random number generator (RNG). This was intended to include protection in the event of a fork() system call in order to ensure that the parent and child processes did not share the same RNG state. However this protection was not being used in the default case. A partial mitigation for this issue is that the output from a high precision timer is mixed into the RNG state so the likelihood of a parent and child process sharing state is significantly reduced. If an application already calls OPENSSL_init_crypto() explicitly using OPENSSL_INIT_ATFORK then this problem does not occur at all. Fixed in OpenSSL 1.1.1d (Affected 1.1.1-1.1.1c).</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-1549" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2019-1563"></a>
+                                                <strong class="name">CVE-2019-1563</strong>
+                                                <div>In situations where an attacker receives automated notification of the success or failure of a decryption attempt an attacker, after sending a very large number of messages to be decrypted, can recover a CMS/PKCS7 transported encryption key or decrypt any RSA encrypted message that was encrypted with the public RSA key, using a Bleichenbacher padding oracle attack. Applications are not affected if they use a certificate together with the private RSA key to the CMS_decrypt or PKCS7_decrypt functions to select the correct recipient info to decrypt. Fixed in OpenSSL 1.1.1d (Affected 1.1.1-1.1.1c). Fixed in OpenSSL 1.1.0l (Affected 1.1.0-1.1.0k). Fixed in OpenSSL 1.0.2t (Affected 1.0.2-1.0.2s).</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-1563" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2019-1547"></a>
+                                                <strong class="name">CVE-2019-1547</strong>
+                                                <div>Normally in OpenSSL EC groups always have a co-factor present and this is used in side channel resistant code paths. However, in some cases, it is possible to construct a group using explicit parameters (instead of using a named curve). In those cases it is possible that such a group does not have the cofactor present. This can occur even where all the parameters match a known named curve. If such a curve is used then OpenSSL falls back to non-side channel resistant code paths which may result in full key recovery during an ECDSA signature operation. In order to be vulnerable an attacker would have to have the ability to time the creation of a large number of signatures where explicit parameters with no co-factor present are in use by an application using libcrypto. For the avoidance of doubt libssl is not vulnerable because explicit parameters are never used. Fixed in OpenSSL 1.1.1d (Affected 1.1.1-1.1.1c). Fixed in OpenSSL 1.1.0l (Affected 1.1.0-1.1.0k). Fixed in OpenSSL 1.0.2t (Affected 1.0.2-1.0.2s).</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-1547" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>systemd</strong> <span>237-3ubuntu10.31</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="CVE-2018-20839"></a>
+                                                <strong class="name">CVE-2018-20839</strong>
+                                                <div>systemd 242 changes the VT1 mode upon a logout, which allows attackers to read cleartext passwords in certain circumstances, such as watching a shutdown, or using Ctrl-Alt-F1 and Ctrl-Alt-F2. This occurs because the KDGKBMODE (aka current keyboard mode) check is mishandled.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-20839" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2019-3843"></a>
+                                                <strong class="name">CVE-2019-3843</strong>
+                                                <div>It was discovered that a systemd service that uses DynamicUser property can create a SUID/SGID binary that would be allowed to run as the transient service UID/GID even after the service is terminated. A local attacker may use this flaw to access resources that will be owned by a potentially different service in the future, when the UID/GID will be recycled.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-3843" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2019-3844"></a>
+                                                <strong class="name">CVE-2019-3844</strong>
+                                                <div>It was discovered that a systemd service that uses DynamicUser property can get new privileges through the execution of SUID binaries, which would allow to create binaries owned by the service transient group with the setgid bit set. A local attacker may use this flaw to access resources that will be owned by a potentially different service in the future, when the GID will be recycled.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-3844" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>ncurses</strong> <span>6.1-1ubuntu1.18.04</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Negligible">
+                                                <a class="vulnerability__title" name="CVE-2019-17594"></a>
+                                                <strong class="name">CVE-2019-17594</strong>
+                                                <div>There is a heap-based buffer over-read in the _nc_find_entry function in tinfo/comp_hash.c in the terminfo library in ncurses before 6.1-20191012.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-17594" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Negligible">
+                                                <a class="vulnerability__title" name="CVE-2019-17595"></a>
+                                                <strong class="name">CVE-2019-17595</strong>
+                                                <div>There is a heap-based buffer over-read in the fmt_entry function in tinfo/comp_hash.c in the terminfo library in ncurses before 6.1-20191012.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-17595" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libtasn1-6</strong> <span>4.13-2</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Negligible">
+                                                <a class="vulnerability__title" name="CVE-2018-1000654"></a>
+                                                <strong class="name">CVE-2018-1000654</strong>
+                                                <div>GNU Libtasn1-4.13 libtasn1-4.13 version libtasn1-4.13, libtasn1-4.12 contains a DoS, specifically CPU usage will reach 100% when running asn1Paser against the POC due to an issue in _asn1_expand_object_id(p_tree), after a long time, the program will be killed. This attack appears to be exploitable via parsing a crafted file.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-1000654" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>libgcrypt20</strong> <span>1.8.1-4ubuntu1.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="CVE-2019-13627"></a>
+                                                <strong class="name">CVE-2019-13627</strong>
+                                                <div>It was discovered that there was a ECDSA timing attack in the libgcrypt20 cryptographic library. Version affected: 1.8.4-5, 1.7.6-2+deb9u3, and 1.6.3-2+deb8u4. Versions fixed: 1.8.5-2 and 1.6.3-2+deb8u7.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-13627" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2019-12904"></a>
+                                                <strong class="name">CVE-2019-12904</strong>
+                                                <div>In Libgcrypt 1.8.4, the C implementation of AES is vulnerable to a flush-and-reload side-channel attack because physical addresses are available to other processes. (The C implementation is used on platforms where an assembly-language implementation is unavailable.)</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-12904" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>shadow</strong> <span>1:4.5-1ubuntu2</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2018-7169"></a>
+                                                <strong class="name">CVE-2018-7169</strong>
+                                                <div>An issue was discovered in shadow 4.5. newgidmap (in shadow-utils) is setuid and allows an unprivileged user to be placed in a user namespace where setgroups(2) is permitted. This allows an attacker to remove themselves from a supplementary group, which may allow access to certain filesystem paths if the administrator has used "group blacklisting" (e.g., chmod g-rwx) to restrict access to paths. This flaw effectively reverts a security feature in the kernel (in particular, the /proc/self/setgroups knob) to prevent this sort of privilege escalation.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-7169" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2013-4235"></a>
+                                                <strong class="name">CVE-2013-4235</strong>
+                                                <div>TOCTOU race conditions by copying and removing directory trees</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2013-4235" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>coreutils</strong> <span>8.28-1ubuntu1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2016-2781"></a>
+                                                <strong class="name">CVE-2016-2781</strong>
+                                                <div>chroot in GNU coreutils, when used with --userspec, allows local users to escape to the parent session via a crafted TIOCSTI ioctl call, which pushes characters to the terminal's input buffer.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2016-2781" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>dpkg</strong> <span>1.19.0.5ubuntu2.3</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Negligible">
+                                                <a class="vulnerability__title" name="CVE-2017-8283"></a>
+                                                <strong class="name">CVE-2017-8283</strong>
+                                                <div>dpkg-source in dpkg 1.3.0 through 1.18.23 is able to use a non-GNU patch program and does not offer a protection mechanism for blank-indented diff hunks, which allows remote attackers to conduct directory traversal attacks via a crafted Debian source package, as demonstrated by use of dpkg-source on NetBSD.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2017-8283" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>nghttp2</strong> <span>1.30.0-1ubuntu1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="CVE-2019-9513"></a>
+                                                <strong class="name">CVE-2019-9513</strong>
+                                                <div>Some HTTP/2 implementations are vulnerable to resource loops, potentially leading to a denial of service. The attacker creates multiple request streams and continually shuffles the priority of the streams in a way that causes substantial churn to the priority tree. This can consume excess CPU.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-9513" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Medium">
+                                                <a class="vulnerability__title" name="CVE-2019-9511"></a>
+                                                <strong class="name">CVE-2019-9511</strong>
+                                                <div>Some HTTP/2 implementations are vulnerable to window size manipulation and stream prioritization manipulation, potentially leading to a denial of service. The attacker requests a large amount of data from a specified resource over multiple streams. They manipulate window size and stream priority to force the server to queue the data in 1-byte chunks. Depending on how efficiently this data is queued, this can consume excess CPU, memory, or both.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-9511" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>util-linux</strong> <span>2.31.1-0.4ubuntu3.4</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Negligible">
+                                                <a class="vulnerability__title" name="CVE-2018-7738"></a>
+                                                <strong class="name">CVE-2018-7738</strong>
+                                                <div>In util-linux before 2.32-rc1, bash-completion/umount allows local users to gain privileges by embedding shell commands in a mountpoint name, which is mishandled during a umount command (within Bash) by a different user, as demonstrated by logging in as root and entering umount followed by a tab character for autocompletion.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-7738" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>openldap</strong> <span>2.4.45+dfsg-1ubuntu1.4</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2017-14159"></a>
+                                                <strong class="name">CVE-2017-14159</strong>
+                                                <div>slapd in OpenLDAP 2.4.45 and earlier creates a PID file after dropping privileges to a non-root account, which might allow local users to kill arbitrary processes by leveraging access to this non-root account for PID file modification before a root script executes a "kill `cat /pathname`" command, as demonstrated by openldap-initscript.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2017-14159" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>sqlite3</strong> <span>3.22.0-1ubuntu0.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2019-16168"></a>
+                                                <strong class="name">CVE-2019-16168</strong>
+                                                <div>In SQLite through 3.29.0, whereLoopAddBtreeIndex in sqlite3.c can crash a browser or other application because of missing validation of a sqlite_stat1 sz field, aka a "severe division by zero in the query planner."</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-16168" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2019-5827"></a>
+                                                <strong class="name">CVE-2019-5827</strong>
+                                                <div>Integer overflow in SQLite via WebSQL in Google Chrome prior to 74.0.3729.131 allowed a remote attacker to potentially exploit heap corruption via a crafted HTML page.</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2019-5827" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                    <li class="feature">
+                                        <div class="feature__title">
+                                           <strong>tar</strong> <span>1.29b-2ubuntu0.1</span> - <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                        </div>
+                                        
+                                        <ul class="vulnerabilities">
+                                            <li class="vulnerability Low">
+                                                <a class="vulnerability__title" name="CVE-2018-20482"></a>
+                                                <strong class="name">CVE-2018-20482</strong>
+                                                <div>GNU Tar through 1.30, when --sparse is used, mishandles file shrinkage during read access, which allows local users to cause a denial of service (infinite read loop in sparse_dump_region in sparse.c) by modifying a file that is supposed to be archived by a different user's process (e.g., a system backup running as root).</div>
+                                                <a href="http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-20482" target="blank">Link</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    
+                                    
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+            </div>
+    </div>
+    </section>
+    </div>
+
+    <script>
+        (function() {
+            const togglers = document.querySelectorAll('[data-toggle-layer]');
+            console.log(togglers);
+
+            for (var i = togglers.length - 1; i >= 0; i--) {
+                togglers[i].onclick = function(e) {
+                    e.target.parentNode.classList.toggle('closed');
+                };
+            }
+        })();
+    </script>
+</body>
+
+</html>
