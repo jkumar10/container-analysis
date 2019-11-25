@@ -1,0 +1,23 @@
+TOTAL HTML FILES ANALYZED:  121
+TOTAL UNIQUE CVE:  1118
+AVERAGE VULNERABILITIES(CVES) IN IMAGE:  73
+TOTAL LOW VULNERABILITIES:  2065
+TOTAL MEDIUM VULNERABILITIES:  171
+TOTAL HIGH VULNERABILITIES:  4
+TOTAL NEGLIGIBLE VULNERABILITIES:  6643
+AVERAGE NUMBER OF LOW VULNERABILITIES:  17
+AVERAGE NUMBER OF MEDIUM VULNERABILITIES:  1
+AVERAGE NUMBER OF HIGH VULNERABILITIES:  0
+AVERAGE NUMBER OF NEGLIGIBLE VULNERABILITIES:  54
+TOP 11 OFFICIAL IMAGES WITH MOST VULNERABILITIES: 
+1 . analysis-node-latest.html:  490
+2 . analysis-pypy-latest.html:  489
+3 . analysis-known-latest.html:  254
+4 . analysis-buildpack-deps-latest.html:  250
+5 . analysis-ruby-latest.html:  250
+6 . analysis-perl-latest.html:  250
+7 . analysis-python-latest.html:  250
+8 . analysis-drupal-latest.html:  240
+9 . analysis-mediawiki-latest.html:  240
+10 . analysis-sentry-latest.html:  229
+11 . analysis-nextcloud-latest.html:  223
