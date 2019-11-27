@@ -4,13 +4,14 @@ from bs4 import BeautifulSoup
 import os
 import sys
 from tqdm import tqdm
+from collections import Counter
 
-OFFICIAL_IMAGE_PATH="/home/ubuntu/official_reports"
-fwi=open("official_individual_image_stats.txt","w")
-fwc=open("official_output_cve_list.txt","w")
+OFFICIAL_IMAGE_PATH="D:\malware\official_image_reports"
+fwi=open("individual_image_stats.txt","w")
+fwc=open("unique_cve_list.txt","w")
 fws=open("official_stats.txt","w")
-sys.stdout=fwi
-print("--------CLASSIFYING VULNERABILITIES IN OFFICIAL IMAGES-------------")
+fwl=open("official_label_cve.txt","w")
+print("--------CLASSIFYING VULNERABILITIES IN OFFICIAL IMAGES-------------",file=fwi)
 directory = os.fsencode(OFFICIAL_IMAGE_PATH)
 os.chdir(OFFICIAL_IMAGE_PATH)
 total_low=total_medium=total_high=total_neg=0
@@ -24,6 +25,8 @@ image_medium={}
 image_high={}
 image_neg={}
 image_tot={}
+total_labeled_cve=[]
+total_cve=[]
 for file in tqdm(os.listdir(directory)):
      file_counter+=1
      low=medium=high=neg=0
@@ -49,9 +52,10 @@ for file in tqdm(os.listdir(directory)):
                  data_value = (new_list_data[i])
                  if (data_value is not None or data_value != "" or data_value != '\n'):
                      str_data = str(data_value).split('"')
-
-                     # cve[vulnearability_id] = severity
                      cve[str_data[3]] = str_data[1]
+                     total_cve.append(str_data[3].replace('#','').strip())
+                     total_labeled_cve.append(str_data[3].replace('#','').strip()+","+str_data[1].replace('node','').strip()+","+(filename.replace('analysis-','')).replace('-latest.html','').strip())
+
 
              low = medium = neg = high = 0
              for key in cve:
@@ -69,13 +73,13 @@ for file in tqdm(os.listdir(directory)):
                      high += 1
                      total_high+=1
 
-             print("-------------------------------------------------------------")
-             print("File Image: ", filename)
-             print("LOW: ", low)
-             print("MEDIUM: ", medium)
-             print("HIGH: ", high)
-             print("NEGLIGIBLE: ", neg)
-             print("-------------------------------------------------------------")
+             print("-------------------------------------------------------------",file=fwi)
+             print("File Image: ", filename,file=fwi)
+             print("LOW: ", low,file=fwi)
+             print("MEDIUM: ", medium,file=fwi)
+             print("HIGH: ", high,file=fwi)
+             print("NEGLIGIBLE: ", neg,file=fwi)
+             print("-------------------------------------------------------------",file=fwi)
 
              image_low[filename]=low
              image_medium[filename] = medium
@@ -109,8 +113,20 @@ for item in image_tot:
         break
     print(t,". "+item+": ",image_tot[item], file=fws)
     t+=1
-print("--------------------------------------------------------------------------")
+print("TOP 11 MOST FREQUENT VULNERABILITIES: ",file=fws)
+c = Counter(total_list_cve)
+i=0
+for element in c:
+    if(i>=10):
+        break
+    print(element,file=fws)
+    i+=1
 
+print("--------------------------------------------------------------------------",file=fwi)
+
+
+for k in total_labeled_cve:
+    fwl.write(k+"\n")
 
 
 
