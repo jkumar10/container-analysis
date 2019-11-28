@@ -7,10 +7,10 @@ from tqdm import tqdm
 from collections import Counter
 
 OFFICIAL_IMAGE_PATH="D:\malware\official_image_reports"
-fwi=open("individual_image_stats.txt","w")
-fwc=open("unique_cve_list.txt","w")
-fws=open("official_stats.txt","w")
-fwl=open("official_label_cve.txt","w")
+fwi=open(r"C:\Users\Jainendra\PycharmProjects\malware\reports\official\official_individual_image_stats.txt","w")
+fwc=open(r"C:\Users\Jainendra\PycharmProjects\malware\reports\official\official_unique_cve_list.txt","w")
+fws=open(r"C:\Users\Jainendra\PycharmProjects\malware\reports\official\official_stats.txt","w")
+fwl=open(r"C:\Users\Jainendra\PycharmProjects\malware\reports\official\official_label_cve.txt","w")
 print("--------CLASSIFYING VULNERABILITIES IN OFFICIAL IMAGES-------------",file=fwi)
 directory = os.fsencode(OFFICIAL_IMAGE_PATH)
 os.chdir(OFFICIAL_IMAGE_PATH)
@@ -54,7 +54,7 @@ for file in tqdm(os.listdir(directory)):
                      str_data = str(data_value).split('"')
                      cve[str_data[3]] = str_data[1]
                      total_cve.append(str_data[3].replace('#','').strip())
-                     total_labeled_cve.append(str_data[3].replace('#','').strip()+","+str_data[1].replace('node','').strip()+","+(filename.replace('analysis-','')).replace('-latest.html','').strip())
+                     total_labeled_cve.append(str_data[3].replace('#','').strip()+","+str_data[1].replace('node','').strip()+","+((filename.replace('analysis-','')).replace('-latest.html','')).replace('-','/',1).strip())
 
 
              low = medium = neg = high = 0
@@ -111,7 +111,9 @@ t=1
 for item in image_tot:
     if t > 11:
         break
-    print(t,". "+item+": ",image_tot[item], file=fws)
+    #print(t,". "+item+": ",image_tot[item], file=fws)
+    print(t,". "+((item.replace('analysis-', '')).replace('-latest.html', '')).replace('-', '/', 1).strip()+": ",image_tot[item],file=fws)
+
     t+=1
 print("TOP 11 MOST FREQUENT VULNERABILITIES: ",file=fws)
 c = Counter(total_list_cve)
